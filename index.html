@@ -27,18 +27,21 @@
             <label>Date & Heure :
                 <input type="text" id="datetime" name="datetime" readonly>
             </label>
+            <hr>
             <label>Type de changement de douleur :</label>
             <div class="radio-group" id="painChangeTypeGroup">
                 <label><input type="radio" name="painChangeType" value="Augmentation"> Augmentation</label>
                 <label><input type="radio" name="painChangeType" value="Diminution"> Diminution</label>
                 <label><input type="radio" name="painChangeType" value="Aucun changement"> Aucun changement</label>
             </div>
+            <hr>
             <label>Niveau de douleur :</label>
             <div class="radio-group" id="painLevel">
                 <label><input type="radio" name="painLevel" value="0"> 0</label>
                 <label><input type="radio" name="painLevel" value="1-2"> 1-2</label>
                 <label><input type="radio" name="painLevel" value="3-4"> 3-4</label>
             </div>
+            <hr>
             <label>Déclencheur / Cause :</label>
             <div class="checkbox-group" id="activityBeforeGroup">
                 <label><input type="checkbox" value="Assis sur la chaise du jardin"> Assis sur la chaise du jardin</label>
@@ -54,6 +57,7 @@
                 <label><input type="checkbox" value="Allongé au lit"> Allongé au lit</label>                
                 <label>Autre : <input type="text" id="activityBeforeOther"></label>
             </div>
+            <hr>
             <label>Position / posture :</label>
             <div class="checkbox-group" id="positionGroup">
                 <label><input type="checkbox" value="Debout"> Debout</label>
@@ -64,6 +68,7 @@
                 <label><input type="checkbox" value="Jambes croisées figure 4"> Jambes croisées figure 4</label>
                 <label>Autre : <input type="text" id="positionOther"></label>
             </div>
+            <hr>
             <label>Mouvement / Exercice :</label>
             <div class="checkbox-group" id="movementExerciseGroup">
                 <label><input type="checkbox" value="Pont fessier"> Pont fessier</label>
@@ -71,12 +76,14 @@
                 <label><input type="checkbox" value="Étirement"> Étirement</label>
                 <label>Autre : <input type="text" id="movementExerciseOther"></label>
             </div>
+            <hr>
             <label>Déclencheur possible :</label>
             <div class="checkbox-group" id="possibleTriggerGroup">
                 <label><input type="checkbox" value="Activité après une période d'inactivité"> Activité après une période d'inactivité</label>
                 <label><input type="checkbox" value="Assis trop longtemps"> Assis trop longtemps</label>
                 <label>Autre : <input type="text" id="possibleTriggerOther"></label>
             </div>
+            <hr>
             <label>Méthode de soulagement :</label>
             <div class="checkbox-group" id="reliefMethodGroup">
                 <label><input type="checkbox" value="Changement d'environnement"> Changement d'environnement</label>
@@ -86,6 +93,7 @@
                 <label><input type="checkbox" value="Allongé"> Allongé</label>
                 <label>Autre : <input type="text" id="reliefMethodOther"></label>
             </div>
+            <hr>
             <label>Notes :</label>
             <textarea id="notes" name="notes" rows="2" style="width:100%"></textarea>
             <button type="submit">Valider</button>
