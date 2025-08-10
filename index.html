@@ -35,6 +35,15 @@
                 <label><input type="radio" name="painChangeType" value="Aucun changement"> Aucun changement</label>
             </div>
             <hr>
+            <label>Localisation :</label>
+            <div class="checkbox-group" id="locationGroup">
+                <label><input type="checkbox" value="Adducteur"> Adducteur</label>
+                <label><input type="checkbox" value="Psoas"> Psoas</label>
+                <label><input type="checkbox" value="Hanche"> Hanche</label>
+                <label><input type="checkbox" value="Descendre le adducteur"> Descendre le adducteur</label>
+                <label>Autre : <input type="text" id="locationOther"></label>
+            </div>
+            <hr>
             <label>Niveau de douleur :</label>
             <div class="radio-group" id="painLevel">
                 <label><input type="radio" name="painLevel" value="0"> 0</label>
@@ -148,6 +157,7 @@
                         <tr>
                             <th>Date & Heure</th>
                             <th>Type de changement de douleur</th>
+                            <th>Localisation</th>
                             <th>Niveau de douleur</th>
                             <th>Déclencheur / Cause</th>
                             <th>Position / posture</th>
@@ -165,6 +175,7 @@
                     tr.innerHTML = `
                         <td>${entry.datetime}</td>
                         <td>${entry.painChangeType}</td>
+                        <td>${entry.location || ''}</td>
                         <td>${entry.painLevel}</td>
                         <td>${entry.activityBefore}</td>
                         <td>${entry.position}</td>
@@ -192,6 +203,10 @@
             // Gather form data
             const datetime = document.getElementById('datetime').value;
             const painChangeType = document.querySelector('input[name=painChangeType]:checked')?.value || '';
+            // Location
+            const locationChecks = Array.from(document.querySelectorAll('#locationGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const locationOther = document.getElementById('locationOther').value.trim();
+            const location = locationChecks.concat(locationOther ? [locationOther] : []).join(', ');
             const painLevel = document.querySelector('input[name=painLevel]:checked')?.value || '';
             // Activity before pain spike
             const activityChecks = Array.from(document.querySelectorAll('#activityBeforeGroup input[type=checkbox]:checked')).map(cb => cb.value);
@@ -214,7 +229,7 @@
             const reliefOther = document.getElementById('reliefMethodOther').value.trim();
             const reliefMethod = reliefChecks.concat(reliefOther ? [reliefOther] : []).join(', ');
             const notes = document.getElementById('notes').value.trim();
-            const entry = { datetime, painChangeType, painLevel, activityBefore, position, movementExercise, possibleTrigger, reliefMethod, notes };
+            const entry = { datetime, painChangeType, location, painLevel, activityBefore, position, movementExercise, possibleTrigger, reliefMethod, notes };
             const entries = getPainEntries();
             entries.push(entry);
             savePainEntries(entries);
@@ -229,8 +244,8 @@
             const now = new Date();
             const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
             const csvRows = [
-                ['Date & Heure','Type de changement de douleur','Niveau de douleur','Déclencheur / Cause','Position / posture','Mouvement / Exercice','Déclencheur possible','Méthode de soulagement','Notes'],
-                ...entries.map(e => [e.datetime, e.painChangeType, e.painLevel, e.activityBefore, e.position, e.movementExercise, e.possibleTrigger, e.reliefMethod, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
+                ['Date & Heure','Type de changement de douleur','Localisation','Niveau de douleur','Déclencheur / Cause','Position / posture','Mouvement / Exercice','Déclencheur possible','Méthode de soulagement','Notes'],
+                ...entries.map(e => [e.datetime, e.painChangeType, e.location || '', e.painLevel, e.activityBefore, e.position, e.movementExercise, e.possibleTrigger, e.reliefMethod, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
                 [`Exported at: ${now.toISOString()}`]
             ];
             const csv = csvRows.map(row => row.join(',')).join('\n');
