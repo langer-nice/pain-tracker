@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi de la douleur</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; background: #f7f7f7; }
+        h1 { color: #333; }
+        .form-section, .table-section { background: #fff; padding: 1em; border-radius: 8px; margin-bottom: 2em; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        label { display: block; margin-top: 1em; font-weight: bold; }
+        .checkbox-group, .radio-group { margin-bottom: 1em; }
+        .checkbox-group label, .radio-group label { font-weight: normal; display: inline-block; margin-right: 1em; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+        th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+        th { background: #eee; }
+        button { margin-top: 1em; padding: 0.5em 1em; border-radius: 4px; border: none; background: #1976d2; color: #fff; cursor: pointer; }
+        button:disabled { background: #aaa; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Suivi de la douleur</h1>
+    <div class="form-section">
+        <button id="addBtn">Ajouter</button>
+        <form id="painForm" class="hidden">
+            <label>Date & Heure :
+                <input type="text" id="datetime" name="datetime" readonly>
+            </label>
+            <label>Niveau de douleur :</label>
+            <div class="radio-group" id="painLevel">
+                <label><input type="radio" name="painLevel" value="0"> 0</label>
+                <label><input type="radio" name="painLevel" value="1-2"> 1-2</label>
+                <label><input type="radio" name="painLevel" value="3-4"> 3-4</label>
+            </div>
+            <label>Activité avant le pic de douleur :</label>
+            <div class="checkbox-group" id="activityBeforeGroup">
+                <label><input type="checkbox" value="Activités légères à la maison"> Activités légères à la maison</label>
+                <label><input type="checkbox" value="Marche"> Marche</label>
+                <label><input type="checkbox" value="Marche rapide"> Marche rapide</label>
+                <label><input type="checkbox" value="Marche douce"> Marche douce</label>
+                <label><input type="checkbox" value="Assis au café"> Assis au café</label>
+                <label><input type="checkbox" value="Pause & étirement 5 min"> Pause & étirement 5 min</label>
+                <label><input type="checkbox" value="Assis au bureau à la maison. Assis sur la chaise du jardin"> Assis au bureau à la maison. Assis sur la chaise du jardin</label>
+                <label><input type="checkbox" value="Rameur 10 min"> Rameur 10 min</label>
+                <label><input type="checkbox" value="Entraînement haut du corps"> Entraînement haut du corps</label>
+                <label><input type="checkbox" value="Allongé au lit"> Allongé au lit</label>
+                <label><input type="checkbox" value="Assis sur la chaise du jardin"> Assis sur la chaise du jardin</label>
+                <label>Autre : <input type="text" id="activityBeforeOther"></label>
+            </div>
+            <label>Position / posture :</label>
+            <div class="checkbox-group" id="positionGroup">
+                <label><input type="checkbox" value="Debout"> Debout</label>
+                <label><input type="checkbox" value="Assis"> Assis</label>
+                <label><input type="checkbox" value="Marche"> Marche</label>
+                <label><input type="checkbox" value="Allongé"> Allongé</label>
+                <label><input type="checkbox" value="Jambes croisées"> Jambes croisées</label>
+                <label><input type="checkbox" value="Jambes croisées figure 4"> Jambes croisées figure 4</label>
+                <label>Autre : <input type="text" id="positionOther"></label>
+            </div>
+            <label>Type de mouvement :</label>
+            <div class="checkbox-group" id="movementTypeGroup">
+                <label><input type="checkbox" value="Statique"> Statique</label>
+                <label><input type="checkbox" value="Répétitif"> Répétitif</label>
+                <label><input type="checkbox" value="Étirement"> Étirement</label>
+                <label><input type="checkbox" value="Exercice"> Exercice</label>
+                <label>Autre : <input type="text" id="movementTypeOther"></label>
+            </div>
+            <label>Déclencheur possible :</label>
+            <div class="checkbox-group" id="possibleTriggerGroup">
+                <label><input type="checkbox" value="Activité après une période d'inactivité"> Activité après une période d'inactivité</label>
+                <label><input type="checkbox" value="Assis trop longtemps"> Assis trop longtemps</label>
+                <label>Autre : <input type="text" id="possibleTriggerOther"></label>
+            </div>
+            <label>Méthode de soulagement :</label>
+            <div class="checkbox-group" id="reliefMethodGroup">
+                <label><input type="checkbox" value="Changement d'environnement"> Changement d'environnement</label>
+                <label><input type="checkbox" value="Étirement"> Étirement</label>
+                <label><input type="checkbox" value="Assis"> Assis</label>
+                <label><input type="checkbox" value="Marche"> Marche</label>
+                <label><input type="checkbox" value="Allongé"> Allongé</label>
+                <label>Autre : <input type="text" id="reliefMethodOther"></label>
+            </div>
+            <label>Changement de douleur après soulagement :</label>
+            <select id="painChange" name="painChange">
+                <option value="Mieux">Mieux</option>
+                <option value="Pire">Pire</option>
+                <option value="Aucun changement">Aucun changement</option>
+            </select>
+            <label>Notes :</label>
+            <textarea id="notes" name="notes" rows="2" style="width:100%"></textarea>
+            <button type="submit">Valider</button>
+        </form>
+    </div>
+    <div class="table-section">
+        <table id="painTable">
+            <thead>
+                <tr>
+                    <th>Date & Heure</th>
+                    <th>Niveau de douleur</th>
+                    <th>Activité avant le pic</th>
+                    <th>Position / posture</th>
+                    <th>Type de mouvement</th>
+                    <th>Déclencheur possible</th>
+                    <th>Méthode de soulagement</th>
+                    <th>Changement après soulagement</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button id="exportBtn">Exporter les données</button>
+    </div>
+    <script>
+        // Utility functions
+        function getCurrentDate() {
+            const d = new Date();
+            // Always YYYY-MM-DD
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        function getCurrentTime() {
+            const d = new Date();
+            // Always 24h HH:MM
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+        function getPainEntries() {
+            return JSON.parse(localStorage.getItem('painEntries') || '[]');
+        }
+        function savePainEntries(entries) {
+            localStorage.setItem('painEntries', JSON.stringify(entries));
+        }
+        function addRowToTable(entry) {
+            const tbody = document.querySelector('#painTable tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${entry.datetime}</td>
+                <td>${entry.painLevel}</td>
+                <td>${entry.activityBefore}</td>
+                <td>${entry.position}</td>
+                <td>${entry.movementType}</td>
+                <td>${entry.possibleTrigger}</td>
+                <td>${entry.reliefMethod}</td>
+                <td>${entry.painChange}</td>
+                <td>${entry.notes}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+        function refreshTable() {
+            const entries = getPainEntries();
+            const tbody = document.querySelector('#painTable tbody');
+            tbody.innerHTML = '';
+            entries.forEach(addRowToTable);
+        }
+        // Show form on Add button
+        document.getElementById('addBtn').onclick = function() {
+            document.getElementById('painForm').classList.remove('hidden');
+            document.getElementById('datetime').value = getCurrentDate() + ' ' + getCurrentTime();
+        };
+        // Handle form submit
+        document.getElementById('painForm').onsubmit = function(e) {
+            e.preventDefault();
+            // Gather form data
+            const datetime = document.getElementById('datetime').value;
+            const painLevel = document.querySelector('input[name=painLevel]:checked')?.value || '';
+            // Activity before pain spike
+            const activityChecks = Array.from(document.querySelectorAll('#activityBeforeGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const activityOther = document.getElementById('activityBeforeOther').value.trim();
+            const activityBefore = activityChecks.concat(activityOther ? [activityOther] : []).join(', ');
+            // Position / posture
+            const positionChecks = Array.from(document.querySelectorAll('#positionGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const positionOther = document.getElementById('positionOther').value.trim();
+            const position = positionChecks.concat(positionOther ? [positionOther] : []).join(', ');
+            // Movement type
+            const movementTypeChecks = Array.from(document.querySelectorAll('#movementTypeGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const movementTypeOther = document.getElementById('movementTypeOther').value.trim();
+            const movementType = movementTypeChecks.concat(movementTypeOther ? [movementTypeOther] : []).join(', ');
+            // Possible trigger
+            const triggerChecks = Array.from(document.querySelectorAll('#possibleTriggerGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const triggerOther = document.getElementById('possibleTriggerOther').value.trim();
+            const possibleTrigger = triggerChecks.concat(triggerOther ? [triggerOther] : []).join(', ');
+            // Relief method
+            const reliefChecks = Array.from(document.querySelectorAll('#reliefMethodGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const reliefOther = document.getElementById('reliefMethodOther').value.trim();
+            const reliefMethod = reliefChecks.concat(reliefOther ? [reliefOther] : []).join(', ');
+            const painChange = document.getElementById('painChange').value;
+            const notes = document.getElementById('notes').value.trim();
+            const entry = { datetime, painLevel, activityBefore, position, movementType, possibleTrigger, reliefMethod, painChange, notes };
+            const entries = getPainEntries();
+            entries.push(entry);
+            savePainEntries(entries);
+            addRowToTable(entry);
+            document.getElementById('painForm').reset();
+            document.getElementById('painForm').classList.add('hidden');
+        };
+        // Export data as CSV
+        document.getElementById('exportBtn').onclick = function() {
+            const entries = getPainEntries();
+            if (!entries.length) return alert('No data to export.');
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+            const csvRows = [
+                ['Date & Time','Pain level','Activity before pain spike','Position','Movement type','Possible trigger','Relief method','Pain change after relief','Notes'],
+                ...entries.map(e => [e.datetime, e.painLevel, e.activityBefore, e.position, e.movementType, e.possibleTrigger, e.reliefMethod, e.painChange, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
+                [`Exported at: ${now.toISOString()}`]
+            ];
+            const csv = csvRows.map(row => row.join(',')).join('\n');
+            // Download CSV
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pain_entries_${timestamp}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+        // On load, populate table
+        window.onload = refreshTable;
+    </script>
+</body>
+</html>
