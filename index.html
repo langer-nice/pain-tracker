@@ -82,11 +82,11 @@
                 <label>Autre : <input type="text" id="reliefMethodOther"></label>
             </div>
             <label>Changement de douleur après soulagement :</label>
-            <select id="painChange" name="painChange">
-                <option value="Mieux">Mieux</option>
-                <option value="Pire">Pire</option>
-                <option value="Aucun changement">Aucun changement</option>
-            </select>
+            <div class="radio-group" id="painChangeGroup">
+                <label><input type="radio" name="painChange" value="Mieux"> Mieux</label>
+                <label><input type="radio" name="painChange" value="Pire"> Pire</label>
+                <label><input type="radio" name="painChange" value="Aucun changement"> Aucun changement</label>
+            </div>
             <label>Notes :</label>
             <textarea id="notes" name="notes" rows="2" style="width:100%"></textarea>
             <button type="submit">Valider</button>
@@ -187,7 +187,8 @@
             const reliefChecks = Array.from(document.querySelectorAll('#reliefMethodGroup input[type=checkbox]:checked')).map(cb => cb.value);
             const reliefOther = document.getElementById('reliefMethodOther').value.trim();
             const reliefMethod = reliefChecks.concat(reliefOther ? [reliefOther] : []).join(', ');
-            const painChange = document.getElementById('painChange').value;
+            // Changement de douleur après soulagement
+            const painChange = document.querySelector('input[name=painChange]:checked')?.value || '';
             const notes = document.getElementById('notes').value.trim();
             const entry = { datetime, painLevel, activityBefore, position, movementType, possibleTrigger, reliefMethod, painChange, notes };
             const entries = getPainEntries();
