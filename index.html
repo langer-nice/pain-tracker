@@ -27,13 +27,19 @@
             <label>Date & Heure :
                 <input type="text" id="datetime" name="datetime" readonly>
             </label>
+            <label>Type de changement de douleur :</label>
+            <div class="radio-group" id="painChangeTypeGroup">
+                <label><input type="radio" name="painChangeType" value="Augmentation"> Augmentation</label>
+                <label><input type="radio" name="painChangeType" value="Diminution"> Diminution</label>
+                <label><input type="radio" name="painChangeType" value="Aucun changement"> Aucun changement</label>
+            </div>
             <label>Niveau de douleur :</label>
             <div class="radio-group" id="painLevel">
                 <label><input type="radio" name="painLevel" value="0"> 0</label>
                 <label><input type="radio" name="painLevel" value="1-2"> 1-2</label>
                 <label><input type="radio" name="painLevel" value="3-4"> 3-4</label>
             </div>
-            <label>Activité avant le pic de douleur :</label>
+            <label>Déclencheur / Cause :</label>
             <div class="checkbox-group" id="activityBeforeGroup">
                 <label><input type="checkbox" value="Assis sur la chaise du jardin"> Assis sur la chaise du jardin</label>
                 <label><input type="checkbox" value="Activités légères à la maison"> Activités légères à la maison</label>
@@ -58,13 +64,12 @@
                 <label><input type="checkbox" value="Jambes croisées figure 4"> Jambes croisées figure 4</label>
                 <label>Autre : <input type="text" id="positionOther"></label>
             </div>
-            <label>Type de mouvement :</label>
-            <div class="checkbox-group" id="movementTypeGroup">
-                <label><input type="checkbox" value="Statique"> Statique</label>
-                <label><input type="checkbox" value="Répétitif"> Répétitif</label>
+            <label>Mouvement / Exercice :</label>
+            <div class="checkbox-group" id="movementExerciseGroup">
+                <label><input type="checkbox" value="Pont fessier"> Pont fessier</label>
+                <label><input type="checkbox" value="Vélo"> Vélo</label>
                 <label><input type="checkbox" value="Étirement"> Étirement</label>
-                <label><input type="checkbox" value="Exercice"> Exercice</label>
-                <label>Autre : <input type="text" id="movementTypeOther"></label>
+                <label>Autre : <input type="text" id="movementExerciseOther"></label>
             </div>
             <label>Déclencheur possible :</label>
             <div class="checkbox-group" id="possibleTriggerGroup">
@@ -81,36 +86,13 @@
                 <label><input type="checkbox" value="Allongé"> Allongé</label>
                 <label>Autre : <input type="text" id="reliefMethodOther"></label>
             </div>
-            <label>Changement de douleur après soulagement :</label>
-            <div class="radio-group" id="painChangeGroup">
-                <label><input type="radio" name="painChange" value="Mieux"> Mieux</label>
-                <label><input type="radio" name="painChange" value="Pire"> Pire</label>
-                <label><input type="radio" name="painChange" value="Aucun changement"> Aucun changement</label>
-            </div>
             <label>Notes :</label>
             <textarea id="notes" name="notes" rows="2" style="width:100%"></textarea>
             <button type="submit">Valider</button>
         </form>
     </div>
-    <div class="table-section">
-        <table id="painTable">
-            <thead>
-                <tr>
-                    <th>Date & Heure</th>
-                    <th>Niveau de douleur</th>
-                    <th>Activité avant le pic</th>
-                    <th>Position / posture</th>
-                    <th>Type de mouvement</th>
-                    <th>Déclencheur possible</th>
-                    <th>Méthode de soulagement</th>
-                    <th>Changement après soulagement</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <button id="exportBtn">Exporter les données</button>
-    </div>
+    <div class="table-section" id="tablesContainer"></div>
+    <button id="exportBtn">Exporter les données</button>
     <script>
         // Utility functions
         function getCurrentDate() {
@@ -134,27 +116,62 @@
         function savePainEntries(entries) {
             localStorage.setItem('painEntries', JSON.stringify(entries));
         }
-        function addRowToTable(entry) {
-            const tbody = document.querySelector('#painTable tbody');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${entry.datetime}</td>
-                <td>${entry.painLevel}</td>
-                <td>${entry.activityBefore}</td>
-                <td>${entry.position}</td>
-                <td>${entry.movementType}</td>
-                <td>${entry.possibleTrigger}</td>
-                <td>${entry.reliefMethod}</td>
-                <td>${entry.painChange}</td>
-                <td>${entry.notes}</td>
-            `;
-            tbody.appendChild(tr);
+        function groupEntriesByDate(entries) {
+            const groups = {};
+            entries.forEach(entry => {
+                const date = entry.datetime.split(' ')[0];
+                if (!groups[date]) groups[date] = [];
+                groups[date].push(entry);
+            });
+            return groups;
+        }
+        function renderTables() {
+            const entries = getPainEntries();
+            const groups = groupEntriesByDate(entries);
+            const container = document.getElementById('tablesContainer');
+            container.innerHTML = '';
+            const dates = Object.keys(groups).sort((a, b) => b.localeCompare(a)); // Descending
+            dates.forEach(date => {
+                const table = document.createElement('table');
+                table.className = 'painTable';
+                table.innerHTML = `
+                    <caption style="font-weight:bold; margin-bottom:8px;">${date}</caption>
+                    <thead>
+                        <tr>
+                            <th>Date & Heure</th>
+                            <th>Type de changement de douleur</th>
+                            <th>Niveau de douleur</th>
+                            <th>Déclencheur / Cause</th>
+                            <th>Position / posture</th>
+                            <th>Mouvement / Exercice</th>
+                            <th>Déclencheur possible</th>
+                            <th>Méthode de soulagement</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                `;
+                const tbody = table.querySelector('tbody');
+                groups[date].forEach(entry => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${entry.datetime}</td>
+                        <td>${entry.painChangeType}</td>
+                        <td>${entry.painLevel}</td>
+                        <td>${entry.activityBefore}</td>
+                        <td>${entry.position}</td>
+                        <td>${entry.movementExercise}</td>
+                        <td>${entry.possibleTrigger}</td>
+                        <td>${entry.reliefMethod}</td>
+                        <td>${entry.notes}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                container.appendChild(table);
+            });
         }
         function refreshTable() {
-            const entries = getPainEntries();
-            const tbody = document.querySelector('#painTable tbody');
-            tbody.innerHTML = '';
-            entries.forEach(addRowToTable);
+            renderTables();
         }
         // Show form on Add button
         document.getElementById('addBtn').onclick = function() {
@@ -166,6 +183,7 @@
             e.preventDefault();
             // Gather form data
             const datetime = document.getElementById('datetime').value;
+            const painChangeType = document.querySelector('input[name=painChangeType]:checked')?.value || '';
             const painLevel = document.querySelector('input[name=painLevel]:checked')?.value || '';
             // Activity before pain spike
             const activityChecks = Array.from(document.querySelectorAll('#activityBeforeGroup input[type=checkbox]:checked')).map(cb => cb.value);
@@ -175,10 +193,10 @@
             const positionChecks = Array.from(document.querySelectorAll('#positionGroup input[type=checkbox]:checked')).map(cb => cb.value);
             const positionOther = document.getElementById('positionOther').value.trim();
             const position = positionChecks.concat(positionOther ? [positionOther] : []).join(', ');
-            // Movement type
-            const movementTypeChecks = Array.from(document.querySelectorAll('#movementTypeGroup input[type=checkbox]:checked')).map(cb => cb.value);
-            const movementTypeOther = document.getElementById('movementTypeOther').value.trim();
-            const movementType = movementTypeChecks.concat(movementTypeOther ? [movementTypeOther] : []).join(', ');
+            // Mouvement / Exercice
+            const movementExerciseChecks = Array.from(document.querySelectorAll('#movementExerciseGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            const movementExerciseOther = document.getElementById('movementExerciseOther').value.trim();
+            const movementExercise = movementExerciseChecks.concat(movementExerciseOther ? [movementExerciseOther] : []).join(', ');
             // Possible trigger
             const triggerChecks = Array.from(document.querySelectorAll('#possibleTriggerGroup input[type=checkbox]:checked')).map(cb => cb.value);
             const triggerOther = document.getElementById('possibleTriggerOther').value.trim();
@@ -187,16 +205,14 @@
             const reliefChecks = Array.from(document.querySelectorAll('#reliefMethodGroup input[type=checkbox]:checked')).map(cb => cb.value);
             const reliefOther = document.getElementById('reliefMethodOther').value.trim();
             const reliefMethod = reliefChecks.concat(reliefOther ? [reliefOther] : []).join(', ');
-            // Changement de douleur après soulagement
-            const painChange = document.querySelector('input[name=painChange]:checked')?.value || '';
             const notes = document.getElementById('notes').value.trim();
-            const entry = { datetime, painLevel, activityBefore, position, movementType, possibleTrigger, reliefMethod, painChange, notes };
+            const entry = { datetime, painChangeType, painLevel, activityBefore, position, movementExercise, possibleTrigger, reliefMethod, notes };
             const entries = getPainEntries();
             entries.push(entry);
             savePainEntries(entries);
-            addRowToTable(entry);
             document.getElementById('painForm').reset();
             document.getElementById('painForm').classList.add('hidden');
+            renderTables();
         };
         // Export data as CSV
         document.getElementById('exportBtn').onclick = function() {
@@ -205,8 +221,8 @@
             const now = new Date();
             const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
             const csvRows = [
-                ['Date & Time','Pain level','Activity before pain spike','Position','Movement type','Possible trigger','Relief method','Pain change after relief','Notes'],
-                ...entries.map(e => [e.datetime, e.painLevel, e.activityBefore, e.position, e.movementType, e.possibleTrigger, e.reliefMethod, e.painChange, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
+                ['Date & Heure','Type de changement de douleur','Niveau de douleur','Déclencheur / Cause','Position / posture','Mouvement / Exercice','Déclencheur possible','Méthode de soulagement','Notes'],
+                ...entries.map(e => [e.datetime, e.painChangeType, e.painLevel, e.activityBefore, e.position, e.movementExercise, e.possibleTrigger, e.reliefMethod, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
                 [`Exported at: ${now.toISOString()}`]
             ];
             const csv = csvRows.map(row => row.join(',')).join('\n');
