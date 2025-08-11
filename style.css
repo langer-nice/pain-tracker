@@ -1,6 +1,6 @@
-body { font-family: Arial, sans-serif; margin: 2em; background: #f7f7f7; }
+body { font-family: Arial, sans-serif; margin: 2em 1em; background: #f7f7f7; }
 h1 { color: #333; }
-.form-section, .table-section { background: #fff; padding: 1em; border-radius: 8px; margin-bottom: 2em; box-shadow: 0 2px 8px rgba(0,0,0,0.05); min-width: 350px; width: calc(100% - 4em);}
+.form-section, .table-section { background: #fff; padding: 1em; border-radius: 8px; margin-bottom: 2em; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: calc(100% - 2em);}
 label { display: block; margin-top: 1em; font-weight: bold; }
 .checkbox-group, .radio-group { margin-bottom: 1em; }
 .checkbox-group label, .radio-group label { font-weight: normal; display: block; margin-right: 1em; }
