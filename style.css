@@ -1,0 +1,13 @@
+body { font-family: Arial, sans-serif; margin: 2em; background: #f7f7f7; }
+h1 { color: #333; }
+.form-section, .table-section { background: #fff; padding: 1em; border-radius: 8px; margin-bottom: 2em; box-shadow: 0 2px 8px rgba(0,0,0,0.05); min-width: 350px; width: calc(100% - 4em);}
+label { display: block; margin-top: 1em; font-weight: bold; }
+.checkbox-group, .radio-group { margin-bottom: 1em; }
+.checkbox-group label, .radio-group label { font-weight: normal; display: block; margin-right: 1em; }
+table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+th { background: #eee; }
+button { margin-top: 1em; padding: 0.5em 1em; border-radius: 4px; border: none; background: #1976d2; color: #fff; cursor: pointer; }
+button:disabled { background: #f40909; }
+.hidden { display: none; }
+#painLevelGroup { display: flex; gap: 1rem;}
