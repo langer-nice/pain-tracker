@@ -11,3 +11,5 @@ button { margin-top: 1em; padding: 0.5em 1em; border-radius: 4px; border: none; 
 button:disabled { background: #f40909; }
 .hidden { display: none; }
 #painLevelGroup { display: flex; gap: 1rem;}
+.localisation-change { background-color: #eee; display: flex; align-items: center; height: 40px;}
+.localisation-change label {margin-top: 0;}

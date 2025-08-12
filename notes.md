@@ -1,3 +1,11 @@
+# remove commannd
+Remove the section ... from the form and the data table.
+
+
+
+
+
+
 # AI Prompt to start the project
 Create a Pain Tracking html page. Which has the following components : 
 The application is in French

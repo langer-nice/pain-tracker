@@ -15,25 +15,74 @@
                 <input type="text" id="datetime" name="datetime" readonly>
             </label>
             <hr>
-            <label>Type de changement de douleur :</label>
-            <div class="radio-group" id="painChangeTypeGroup">
-                <label><input type="radio" name="painChangeType" value="Augmentation"> Augmentation</label>
-                <label><input type="radio" name="painChangeType" value="Diminution"> Diminution</label>
-                <label><input type="radio" name="painChangeType" value="Aucun changement"> Aucun changement</label>
-            </div>
-            <hr>
             <label>Localisation :</label>
             <div class="checkbox-group" id="locationGroup">
-                <label><input type="checkbox" value="Adducteur"> Adducteur</label>
-                <label><input type="checkbox" value="Psoas"> Psoas</label>
-                <label><input type="checkbox" value="Hanche"> Hanche</label>
-                <label><input type="checkbox" value="Descendre le adducteur"> Descendre le adducteur</label>
-                <label>Autre : <input type="text" id="locationOther"></label>
+                <label>
+                    <input type="checkbox" value="Adducteur"> Adducteur
+                    <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelAdducteur" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changeAdducteur" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changeAdducteur" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changeAdducteur" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Psoas"> Psoas
+                    <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelPsoas" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changePsoas" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changePsoas" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changePsoas" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Hanche"> Hanche
+                    <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelHanche" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changeHanche" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changeHanche" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changeHanche" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Descendre le adducteur"> Descendre le adducteur
+                    <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelDescendreAdducteur" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changeDescendreAdducteur" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changeDescendreAdducteur" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changeDescendreAdducteur" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Bas de dos"> Bas de dos
+                    <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelBasDeDos" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changeBasDeDos" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changeBasDeDos" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changeBasDeDos" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Pieds"> Pieds
+                    <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelPieds" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changePieds" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changePieds" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changePieds" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
+                <label>Autre : <input type="text" id="locationOther"> <input type="number" min="0" max="10" step="1" class="pain-level-input" name="painLevelOther" placeholder="Niveau">
+                    <span class="localisation-change">
+                        <label><input type="radio" name="changeOther" value="Augmentation"> Augmentation</label>
+                        <label><input type="radio" name="changeOther" value="Diminution"> Diminution</label>
+                        <label><input type="radio" name="changeOther" value="Aucun changement"> Aucun changement</label>
+                    </span>
+                </label>
             </div>
             <hr>
             <div class="form-section">
-                <label>Niveau de douleur :</label>
-                <div id="painLevelGroup">
+                <label>Niveau de douleur général :</label>
+                <div id="painLevelGroup" class="radio-group">
                     <label><input type="radio" name="painLevel" value="0"> 0</label>
                     <label><input type="radio" name="painLevel" value="1"> 1</label>
                     <label><input type="radio" name="painLevel" value="2"> 2</label>
@@ -98,7 +147,6 @@
         </form>
     </div>
     <div class="table-section" id="tablesContainer"></div>
-    <!-- <button id="exportBtn">Exporter les données</button> -->
     <script>
         // Utility functions
         function getCurrentDate() {
@@ -145,7 +193,6 @@
                     <thead>
                         <tr>
                             <th>Date & Heure</th>
-                            <th>Type de changement de douleur</th>
                             <th>Localisation</th>
                             <th>Niveau de douleur</th>
                             <th>Déclencheur / Cause</th>
@@ -162,9 +209,8 @@
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${entry.datetime}</td>
-                        <td>${entry.painChangeType}</td>
                         <td>${entry.location || ''}</td>
-                        <td>${entry.painLevel}</td>
+                        <td>${entry.painLevel || ''}</td>
                         <td>${entry.activityBefore}</td>
                         <td>${entry.position}</td>
                         <td>${entry.movementExercise}</td>
@@ -181,8 +227,8 @@
                     const now = new Date();
                     const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
                     const csvRows = [
-                        ['Date & Heure','Type de changement de douleur','Localisation','Niveau de douleur','Déclencheur / Cause','Position / posture','Mouvement / Exercice','Méthode de soulagement','Notes'],
-                        ...groups[today].map(e => [e.datetime, e.painChangeType, e.location || '', e.painLevel, e.activityBefore, e.position, e.movementExercise, e.reliefMethod, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
+                        ['Date & Heure','Localisation','Niveau de douleur','Déclencheur / Cause','Position / posture','Mouvement / Exercice','Méthode de soulagement','Notes'],
+                        ...groups[today].map(e => [e.datetime, e.location || '', e.painLevel || '', e.activityBefore, e.position, e.movementExercise, e.reliefMethod, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
                         [`Exported at: ${now.toISOString()}`]
                     ];
                     const csv = csvRows.map(row => row.join(',')).join('\n');
@@ -215,12 +261,34 @@
             e.preventDefault();
             // Gather form data
             const datetime = document.getElementById('datetime').value;
-            const painChangeType = document.querySelector('input[name=painChangeType]:checked')?.value || '';
-            // Location
-            const locationChecks = Array.from(document.querySelectorAll('#locationGroup input[type=checkbox]:checked')).map(cb => cb.value);
+            // Location with pain levels and change radios
+            const locationData = [];
+            const locationItems = [
+                { key: 'Adducteur', painName: 'painLevelAdducteur', changeName: 'changeAdducteur' },
+                { key: 'Psoas', painName: 'painLevelPsoas', changeName: 'changePsoas' },
+                { key: 'Hanche', painName: 'painLevelHanche', changeName: 'changeHanche' },
+                { key: 'Descendre le adducteur', painName: 'painLevelDescendreAdducteur', changeName: 'changeDescendreAdducteur' },
+                { key: 'Bas de dos', painName: 'painLevelBasDeDos', changeName: 'changeBasDeDos' },
+                { key: 'Pieds', painName: 'painLevelPieds', changeName: 'changePieds' }
+            ];
+            locationItems.forEach(item => {
+                const checkbox = document.querySelector(`#locationGroup input[type=checkbox][value='${item.key}']`);
+                if (checkbox && checkbox.checked) {
+                    const painValue = document.querySelector(`input[name='${item.painName}']`)?.value || '';
+                    const changeValue = document.querySelector(`input[name='${item.changeName}']:checked`)?.value || '';
+                    locationData.push(`${item.key} (${painValue}, ${changeValue})`);
+                }
+            });
+            // Autre location
             const locationOther = document.getElementById('locationOther').value.trim();
-            const location = locationChecks.concat(locationOther ? [locationOther] : []).join(', ');
-            const painLevel = document.querySelector('input[name=painLevel]:checked')?.value || '';
+            const painLevelOther = document.querySelector("input[name='painLevelOther']")?.value || '';
+            const changeOther = document.querySelector("input[name='changeOther']:checked")?.value || '';
+            if (locationOther) {
+                locationData.push(`Autre: ${locationOther} (${painLevelOther}, ${changeOther})`);
+            }
+            const location = locationData.join(', ');
+            // General pain level
+            const painLevel = document.querySelector('input[name="painLevel"]:checked')?.value || '';
             // Activity before pain spike
             const activityChecks = Array.from(document.querySelectorAll('#activityBeforeGroup input[type=checkbox]:checked')).map(cb => cb.value);
             const activityOther = document.getElementById('activityBeforeOther').value.trim();
@@ -238,35 +306,13 @@
             const reliefOther = document.getElementById('reliefMethodOther').value.trim();
             const reliefMethod = reliefChecks.concat(reliefOther ? [reliefOther] : []).join(', ');
             const notes = document.getElementById('notes').value.trim();
-            const entry = { datetime, painChangeType, location, painLevel, activityBefore, position, movementExercise, reliefMethod, notes };
+            const entry = { datetime, location, painLevel, activityBefore, position, movementExercise, reliefMethod, notes };
             const entries = getPainEntries();
             entries.push(entry);
             savePainEntries(entries);
             document.getElementById('painForm').reset();
             renderTables();
             document.getElementById('painForm').classList.add('hidden');
-        };
-        // Export data as CSV
-        document.getElementById('exportBtn').onclick = function() {
-            const entries = getPainEntries();
-            if (!entries.length) return alert('No data to export.');
-            const now = new Date();
-            const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
-            const csvRows = [
-                ['Date & Heure','Type de changement de douleur','Localisation','Niveau de douleur','Déclencheur / Cause','Position / posture','Mouvement / Exercice','Méthode de soulagement','Notes'],
-                ...entries.map(e => [e.datetime, e.painChangeType, e.location || '', e.painLevel, e.activityBefore, e.position, e.movementExercise, e.reliefMethod, e.notes].map(v => '"'+(v||'').replace(/"/g,'""')+'"')),
-                [`Exported at: ${now.toISOString()}`]
-            ];
-            const csv = csvRows.map(row => row.join('\n')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `pain_entries_${timestamp}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         };
         // On load, populate table
         window.onload = refreshTable;
