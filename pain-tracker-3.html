@@ -194,6 +194,12 @@
     <input id="notes" type="text" placeholder="e.g., 2→1 after light activity" />
   </div>
 
+  <input type="hidden" id="editId" />
+<div id="editBar" style="display:none; margin:8px 0 0; font-size:14px">
+  <strong>Editing entry…</strong>
+  <button id="cancelEdit" class="ghost" type="button" style="margin-left:8px">Cancel</button>
+</div>
+
   <!-- ACTIONS -->
   <div class="card">
     <div class="btnbar">
@@ -217,7 +223,7 @@
 </div>
 
 <script>
-// ---------- Polyfills (safety on older iOS/Chrome) ----------
+// ---------- Polyfills ----------
 if (!('crypto' in window) || !('randomUUID' in crypto)) {
   window.crypto = window.crypto || {};
   crypto.randomUUID = () => 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
@@ -232,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $ = (s,root=document)=>root.querySelector(s);
   const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
 
-  // Init date/time (rounded to 5 min)
+  // Init date/time
   (function initDT(){
     const dt = $('#dt');
     const now = new Date();
@@ -267,18 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Storage
   const KEY = 'painTrackerEntries_v5simple';
-  function load(){
+  const entries = (()=>{
     try{ const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; }
     catch(e){ console.error(e); return []; }
-  }
-  const entries = load();
-
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify(entries));
-    renderList();
-  }
+  })();
+  function persist(){ localStorage.setItem(KEY, JSON.stringify(entries)); }
 
   // Helpers
+  const msgE = $('#msgError'), msgOk = $('#msgOk');
+  function show(el, yes){ el && (el.style.display = yes ? 'block' : 'none'); }
   function selValue(group){
     const n = document.querySelector(`.chip[data-group="${group}"][data-selected="true"]`);
     return n ? n.dataset.value : '';
@@ -286,21 +289,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function selMulti(group){
     return [...document.querySelectorAll(`.chip[data-group="${group}"][data-selected="true"]`)].map(c=>c.dataset.value);
   }
-  function val(id){ const el = document.getElementById(id); return el ? (el.value || '') : ''; }
-  function valTrim(id){ return val(id).trim(); }
-  function show(el, yes){ el.style.display = yes ? 'block' : 'none'; }
-
-  function clearForm(){
+  function clearChips(){
     ['#painChips','#changeChips','#triggers','#reliefTried','#reliefUsed','#reliefOutcome'].forEach(id=>{
       $$(id+' .chip').forEach(c=>c.dataset.selected="false");
     });
-    ['notes','posture','triggerCustom','reliefCustom','duration'].forEach(id=>{
-      const el = document.getElementById(id); if (el) el.value = '';
+  }
+  function setSingleChip(group, value){
+    if(!value) return;
+    const chip = document.querySelector(`.chip[data-group="${CSS.escape(group)}"][data-value="${CSS.escape(value)}"]`);
+    if(chip){ chip.dataset.selected = "true"; }
+  }
+  function setMultiChips(group, csv){
+    if(!csv) return;
+    csv.split(',').map(s=>s.trim()).filter(Boolean).forEach(v=>{
+      const chip = document.querySelector(`.chip[data-group="${CSS.escape(group)}"][data-value="${CSS.escape(v)}"]`);
+      if(chip){ chip.dataset.selected="true"; }
     });
-    $('#durationUnit').value = 'min';
-    $('#load').value = $('#load')?.value || 'Light'; // load not shown in this simpler version, default ok
-    $('#plan').value = $('#plan')?.value || 'Day A';
+  }
+  function val(id){ const el = document.getElementById(id); return el ? (el.value || '') : ''; }
+  function valTrim(id){ return val(id).trim(); }
 
+  function resetDateTimeToNow(){
     const dt = $('#dt');
     const d = new Date();
     d.setMinutes(d.getMinutes() - (d.getMinutes()%5));
@@ -308,52 +317,18 @@ document.addEventListener('DOMContentLoaded', () => {
     dt.value = tz.toISOString().slice(0,16);
   }
 
-  function addEntry(){
-    const msgE = $('#msgError'); const msgOk = $('#msgOk');
-    show(msgE,false); show(msgOk,false);
-
-    const painChip = document.querySelector('.chip[data-group="pain"][data-selected="true"]');
-    const hasTrigger = selMulti('trg').length || valTrim('triggerCustom');
-    if(!painChip || !hasTrigger){
-      show(msgE,true); return;
-    }
-
-    const triggers = [...new Set([
-      ...selMulti('trg'),
-      valTrim('triggerCustom')
-    ].filter(Boolean))].join(', ');
-
-    const reliefTried = [...new Set([
-      ...selMulti('relieftried'),
-      valTrim('reliefCustom')
-    ].filter(Boolean))].join(', ');
-
-    const durNum = valTrim('duration');
-    const durUnit = val('durationUnit') || 'min';
-    const duration = durNum ? `${durNum} ${durUnit}` : '';
-
-    const item = {
-      id: crypto.randomUUID(),
-      datetime: valTrim('dt') || new Date().toISOString().slice(0,16),
-      plan: val('plan'),
-      load: '—', // simplified; can add back if needed
-      pain: painChip.dataset.value,
-      change: selValue('change'),
-      triggers,
-      reliefTried,
-      reliefUsed: selValue('reliefused'),
-      reliefOutcome: selValue('reliefoutcome'),
-      duration,
-      posture: valTrim('posture'),
-      notes: valTrim('notes')
-    };
-
-    entries.push(item);
-    save();
-    clearForm();
-    show(msgOk,true);
-    setTimeout(()=>show(msgOk,false), 1200);
-    document.getElementById('list')?.scrollIntoView({behavior:'smooth', block:'start'});
+  function clearForm(){
+    clearChips();
+    ['notes','posture','triggerCustom','reliefCustom','duration'].forEach(id=>{
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    $('#durationUnit').value = 'min';
+    $('#plan').value = $('#plan')?.value || 'Day A';
+    resetDateTimeToNow();
+    // exit edit mode if any
+    $('#editId').value = '';
+    show($('#editBar'), false);
+    $('#add').textContent = 'Add Entry';
   }
 
   function renderList(){
@@ -382,18 +357,105 @@ document.addEventListener('DOMContentLoaded', () => {
           ${e.posture ? `<span class="tag">Posture: ${e.posture}</span>`:''}
         </div>
         ${e.notes? `<div style="font-size:14px; white-space:pre-wrap">${(e.notes||'').replace(/</g,'&lt;')}</div>`:''}
+        <div class="controls" style="margin-top:8px; display:flex; gap:8px">
+          <button class="ghost" data-act="edit" data-id="${e.id}">Edit</button>
+          <button class="danger" data-act="del" data-id="${e.id}">Delete</button>
+        </div>
       `;
       list.appendChild(el);
     });
   }
 
-  // Buttons
-  $('#add').addEventListener('click', addEntry);
-  $('#save').addEventListener('click', ()=>{ save(); const m=$('#msgOk'); m.textContent='Saved locally ✔'; m.style.display='block'; setTimeout(()=>m.style.display='none', 1200); });
+  function buildItemFromForm(){
+    const painChip = document.querySelector('.chip[data-group="pain"][data-selected="true"]');
+    const hasTrigger = selMulti('trg').length || valTrim('triggerCustom');
+    if(!painChip || !hasTrigger){
+      show(msgE,true); show(msgOk,false);
+      return null;
+    }
+    show(msgE,false);
+
+    const triggers = [...new Set([...selMulti('trg'), valTrim('triggerCustom')].filter(Boolean))].join(', ');
+    const reliefTried = [...new Set([...selMulti('relieftried'), valTrim('reliefCustom')].filter(Boolean))].join(', ');
+    const durNum = valTrim('duration');
+    const durUnit = val('durationUnit') || 'min';
+    const duration = durNum ? `${durNum} ${durUnit}` : '';
+
+    return {
+      id: $('#editId').value || crypto.randomUUID(),
+      datetime: valTrim('dt') || new Date().toISOString().slice(0,16),
+      plan: val('plan'),
+      pain: painChip.dataset.value,
+      change: selValue('change'),
+      triggers,
+      reliefTried,
+      reliefUsed: selValue('reliefused'),
+      reliefOutcome: selValue('reliefoutcome'),
+      duration,
+      posture: valTrim('posture'),
+      notes: valTrim('notes')
+    };
+  }
+
+  function startEdit(id){
+    const idx = entries.findIndex(x=>x.id===id);
+    if(idx<0) return;
+    const e = entries[idx];
+
+    // Fill form
+    $('#dt').value = (e.datetime||'').slice(0,16);
+    $('#plan').value = e.plan || 'Day A';
+
+    clearChips();
+    setSingleChip('pain', e.pain);
+    setSingleChip('change', e.change);
+    setMultiChips('trg', e.triggers||'');
+    setMultiChips('relieftried', e.reliefTried||'');
+    setSingleChip('reliefused', e.reliefUsed||'');
+    setSingleChip('reliefoutcome', e.reliefOutcome||'');
+
+    const m = (e.duration||'').match(/^(\d+)\s*(min|h)$/i);
+    $('#duration').value = m? m[1] : '';
+    $('#durationUnit').value = m? m[2].toLowerCase() : 'min';
+
+    $('#posture').value = e.posture || '';
+    $('#notes').value = e.notes || '';
+
+    // Enter edit mode
+    $('#editId').value = e.id;
+    $('#add').textContent = 'Update Entry';
+    show($('#editBar'), true);
+
+    // Remove the old one now; saving will re-add updated
+    entries.splice(idx,1);
+    persist();
+    renderList();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function cancelEdit(){
+    // If we pulled an item out, nothing to restore (user can re-add)
+    clearForm();
+  }
+
+  function saveEntry(){
+    const item = buildItemFromForm();
+    if(!item) return; // validation failed
+    entries.push(item);
+    persist();
+    renderList();
+    clearForm();
+    show(msgOk,true); setTimeout(()=>show(msgOk,false), 1200);
+    $('#list')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // Wire buttons
+  $('#add').addEventListener('click', saveEntry);
+  $('#save').addEventListener('click', ()=>{ persist(); show(msgOk,true); setTimeout(()=>show(msgOk,false), 1200); });
   $('#export').addEventListener('click', ()=>{
-    const header = ["Date & Time","Plan","Pain","Change","Triggers","Relief Tried","Relief Used","Relief Outcome","Pain Duration","Posture","Notes"];
+    const header = ["Date & Time","Plan","Pain","Change","Triggers","Relief Tried","Relief Used","Relief Outcome","Pain Duration","Posture","Notes","ID"];
     const rows = entries.map(e=>[
-      e.datetime, e.plan, e.pain, e.change||'', e.triggers||'', e.reliefTried||'', e.reliefUsed||'', e.reliefOutcome||'', e.duration||'', e.posture||'', (e.notes||'').replace(/\r?\n/g,' ').replace(/"/g,'""')
+      e.datetime, e.plan, e.pain, e.change||'', e.triggers||'', e.reliefTried||'', e.reliefUsed||'', e.reliefOutcome||'', e.duration||'', e.posture||'', (e.notes||'').replace(/\r?\n/g,' ').replace(/"/g,'""'), e.id
     ]);
     const csv = [header, ...rows].map(r=>r.map(v=>`"${(v??'')}"`).join(',')).join('\n');
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
@@ -406,12 +468,29 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#clear').addEventListener('click', ()=>{
     if(!confirm('Delete ALL entries from this device?')) return;
     entries.splice(0, entries.length);
-    save();
+    persist();
+    renderList();
+  });
+  $('#cancelEdit').addEventListener('click', cancelEdit);
+
+  // List actions
+  $('#list').addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.dataset.id;
+    if(b.dataset.act==='del'){
+      if(confirm('Delete this entry?')){
+        const idx = entries.findIndex(x=>x.id===id);
+        if(idx>=0){ entries.splice(idx,1); persist(); renderList(); }
+      }
+    }else if(b.dataset.act==='edit'){
+      startEdit(id);
+    }
   });
 
   // First render
   renderList();
 });
 </script>
+
 </body>
 </html>
