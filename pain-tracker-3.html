@@ -1,461 +1,417 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Pain Tracker — iPhone</title>
-  <meta name="color-scheme" content="light dark" />
-  <style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pain Tracker — Simple</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#ffffff; --fg:#0b1020; --muted:#6b7280; --accent:#2563eb; --accent-2:#10b981;
+    --card:#f8fafc; --chip:#e5e7eb; --danger:#ef4444; --radius:18px; --tap:52px;
+    --shadow:0 6px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+  }
+  @media (prefers-color-scheme: dark){
     :root{
-      --bg:#ffffff; --fg:#0a0a0a; --muted:#6b7280; --accent:#2563eb; --accent-2:#10b981;
-      --card:#f8fafc; --chip:#e5e7eb; --danger:#ef4444; --radius:18px; --tap:52px;
-      --shadow:0 6px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
-      --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      --bg:#0b0d10; --fg:#e5e7eb; --muted:#9ca3af; --accent:#60a5fa; --accent-2:#34d399;
+      --card:#12161b; --chip:#20262d; --shadow:none;
     }
-    @media (prefers-color-scheme: dark){
-      :root{
-        --bg:#0b0d10; --fg:#e5e7eb; --muted:#9ca3af; --accent:#60a5fa; --accent-2:#34d399;
-        --card:#12161b; --chip:#20262d; --shadow:none;
-      }
-      input, select, textarea{ background:#0f1318; color:var(--fg); border-color:#26303a;}
-    }
-    html,body{height:100%}
-    body{ margin:0; background:var(--bg); color:var(--fg); font-family:var(--font); -webkit-font-smoothing:antialiased; line-height:1.3;}
-    header{ position:sticky; top:0; padding:16px 16px calc(env(safe-area-inset-top) + 8px);
-      background:linear-gradient(180deg, rgba(0,0,0,.06), transparent); backdrop-filter: blur(6px); z-index:5; }
-    h1{font-size:22px; margin:0 0 6px}
-    .sub{color:var(--muted); font-size:14px}
-    .wrap{padding:12px 16px 24px; max-width:820px; margin:0 auto}
-    .card{ background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin:12px 0;}
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    @media (max-width:480px){ .row{grid-template-columns:1fr} }
-    label{display:block; font-size:13px; color:var(--muted); margin:2px 2px 6px}
-    input[type="text"],input[type="datetime-local"],input[type="number"],select,textarea{
-      width:100%; border:1px solid #e5e7eb; border-radius:14px; padding:12px 14px;
-      font-size:16px; min-height:var(--tap); box-sizing:border-box;
-    }
-    textarea{min-height:96px; padding:12px 14px; line-height:1.35}
-    .chips{display:flex; flex-wrap:wrap; gap:8px}
-    .chip{
-      user-select:none; cursor:pointer; padding:10px 14px; border-radius:999px; background:var(--chip);
-      color:var(--fg); font-size:14px; min-height:var(--tap); display:flex; align-items:center; border:1px solid transparent;
-    }
-    .chip[data-selected="true"]{ background:var(--accent); color:white; }
-    .chip.alt[data-selected="true"]{ background:var(--accent-2); }
-    .btnbar{display:flex; gap:10px; flex-wrap:wrap}
-    button{ appearance:none; border:none; border-radius:14px; padding:12px 16px; font-size:16px; min-height:var(--tap);
-      cursor:pointer; background:var(--accent); color:#fff; box-shadow:var(--shadow); }
-    .ghost{background:transparent; color:var(--accent); border:1px solid var(--accent)}
-    .danger{background:var(--danger)}
-    .list-empty{color:var(--muted); font-size:14px; padding:8px 2px}
-    .entry{background:transparent; border:1px dashed rgba(127,127,127,.25); border-radius:16px; padding:12px; margin:10px 0}
-    .entry h3{margin:0 0 6px; font-size:16px}
-    .entry small{color:var(--muted)}
-    .entry .tags{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0}
-    .tag{background:var(--chip); padding:6px 10px; border-radius:999px; font-size:12px}
-    .entry .controls{display:flex; gap:8px; margin-top:8px}
-    .hint{font-size:12px; color:var(--muted)}
-    .footer-space{height:calc(env(safe-area-inset-bottom) + 12px)}
-  </style>
+    input, select, textarea{ background:#0f1318; color:var(--fg); border-color:#26303a;}
+  }
+  html,body{height:100%}
+  body{margin:0; background:var(--bg); color:var(--fg); font-family:var(--font); -webkit-font-smoothing:antialiased;}
+  header{position:sticky; top:0; z-index:5; padding:14px 16px calc(env(safe-area-inset-top) + 6px);
+    background:linear-gradient(180deg, rgba(0,0,0,.06), transparent); backdrop-filter: blur(6px);}
+  h1{margin:0 0 4px; font-size:22px}
+  .sub{color:var(--muted); font-size:13px}
+  .wrap{padding:12px 16px 24px; max-width:820px; margin:0 auto}
+  .card{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin:12px 0;}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width:520px){ .row{grid-template-columns:1fr} }
+  label{display:block; font-size:13px; color:var(--muted); margin:0 0 6px}
+  .step{font-weight:600; margin-bottom:8px}
+  input[type="text"],input[type="datetime-local"],input[type="number"],select,textarea{
+    width:100%; border:1px solid #e5e7eb; border-radius:14px; padding:12px 14px; font-size:16px; min-height:var(--tap); box-sizing:border-box;
+  }
+  textarea{min-height:92px; line-height:1.35}
+  .chips{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{
+    user-select:none; cursor:pointer; padding:10px 14px; border-radius:999px; background:var(--chip);
+    color:var(--fg); font-size:15px; min-height:var(--tap); display:flex; align-items:center; border:1px solid transparent;
+  }
+  .chip[data-selected="true"]{ background:var(--accent); color:white; }
+  .chip.alt[data-selected="true"]{ background:var(--accent-2); }
+  .hint{font-size:12px; color:var(--muted); margin-top:6px}
+  .btnbar{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+  button{appearance:none; border:none; border-radius:14px; padding:12px 16px; font-size:16px; min-height:var(--tap);
+    cursor:pointer; background:var(--accent); color:#fff; box-shadow:var(--shadow);}
+  .ghost{background:transparent; color:var(--accent); border:1px solid var(--accent)}
+  .danger{background:var(--danger)}
+  .list-empty{color:var(--muted); font-size:14px; padding:8px 2px}
+  .entry{background:transparent; border:1px dashed rgba(127,127,127,.25); border-radius:16px; padding:12px; margin:10px 0}
+  .entry h3{margin:0 0 6px; font-size:16px}
+  .entry small{color:var(--muted)}
+  .entry .tags{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0}
+  .tag{background:var(--chip); padding:6px 10px; border-radius:999px; font-size:12px}
+  .error{color:#b91c1c; font-size:13px; margin-top:8px; display:none}
+  .ok{color:#15803d; font-size:13px; margin-top:8px; display:none}
+  .footer-space{height:calc(env(safe-area-inset-bottom) + 12px)}
+</style>
 </head>
 <body>
-  <header>
-    <h1>Pain Tracker</h1>
-    <div class="sub">Log → Save locally → Export CSV. Optimized for iPhone.</div>
-  </header>
+<header>
+  <h1>Pain Tracker</h1>
+  <div class="sub">Step-by-step logging • v5 (simple)</div>
+</header>
 
-  <div class="wrap">
-    <!-- FORM -->
-    <div class="card" id="formCard">
-      <!-- TOP ROW -->
-      <div class="row">
-        <div>
-          <label for="dt">Date & Time</label>
-          <input id="dt" type="datetime-local" />
-        </div>
-        <div>
-          <label for="plan">Plan Type</label>
-          <select id="plan">
-            <option value="Day A">Day A – Pelvic/Core</option>
-            <option value="Day B">Day B – Lumbar/Nerve</option>
-            <option value="Day C">Day C – Mixed</option>
-            <option value="Relief">Relief Day</option>
-            <option value="Sport">Sport</option>
-            <option value="Rest">Rest / Other</option>
-          </select>
-        </div>
-      </div>
+<div class="wrap">
 
-      <!-- PAIN + CHANGE -->
-      <div class="row">
-        <div>
-          <label>Pain (0–4) — tap a chip</label>
-          <div class="chips" id="painChips" role="radiogroup" aria-label="Pain level">
-            <div class="chip" data-group="pain" data-value="0">0</div>
-            <div class="chip" data-group="pain" data-value="1">1</div>
-            <div class="chip" data-group="pain" data-value="2">2</div>
-            <div class="chip" data-group="pain" data-value="3">3</div>
-            <div class="chip" data-group="pain" data-value="4">4</div>
-            <div class="chip alt" data-group="pain" data-value="1-2">1–2</div>
-            <div class="chip alt" data-group="pain" data-value="3-4">3–4</div>
-          </div>
-        </div>
-        <div>
-          <label>Change</label>
-          <div class="chips" id="changeChips" role="radiogroup" aria-label="Change">
-            <div class="chip" data-group="change" data-value="Increase">Increase</div>
-            <div class="chip" data-group="change" data-value="Decrease">Decrease</div>
-            <div class="chip" data-group="change" data-value="No change">No change</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TRIGGERS -->
+  <div class="card">
+    <div class="row">
       <div>
-        <label>Triggers (choose any)</label>
-        <div class="chips" id="triggers">
-          <div class="chip" data-group="trg" data-value="Getting out of bed">Getting out of bed</div>
-          <div class="chip" data-group="trg" data-value="Sitting desk">Sitting desk</div>
-          <div class="chip" data-group="trg" data-value="After inactivity">After inactivity</div>
-          <div class="chip" data-group="trg" data-value="Walking">Walking</div>
-          <div class="chip" data-group="trg" data-value="Cycling">Cycling</div>
-          <div class="chip" data-group="trg" data-value="Rowing">Rowing</div>
-          <div class="chip" data-group="trg" data-value="Strength core/pelvis">Strength core/pelvis</div>
-          <div class="chip" data-group="trg" data-value="Standing">Standing</div>
-          <div class="chip" data-group="trg" data-value="Stress">Stress</div>
-          <div class="chip" data-group="trg" data-value="Other">Other</div>
-        </div>
-        <input id="triggerCustom" type="text" placeholder="Add custom trigger (optional)" style="margin-top:8px" />
+        <label for="dt">Date & Time</label>
+        <input id="dt" type="datetime-local" />
       </div>
-
-      <!-- RELIEF TRIED -->
-      <div style="margin-top:10px">
-        <label>Relief Tried (choose any)</label>
-        <div class="chips" id="reliefTried">
-          <div class="chip" data-group="relieftried" data-value="Relief position">Relief position</div>
-          <div class="chip" data-group="relieftried" data-value="Walk">Walk</div>
-          <div class="chip" data-group="relieftried" data-value="Stretch">Stretch</div>
-          <div class="chip" data-group="relieftried" data-value="Change chair/position">Change chair/position</div>
-          <div class="chip" data-group="relieftried" data-value="5 mins active">5 mins active</div>
-          <div class="chip" data-group="relieftried" data-value="Upper body workout">Upper body workout</div>
-          <div class="chip" data-group="relieftried" data-value="Short lie down">Short lie down</div>
-          <div class="chip" data-group="relieftried" data-value="Other">Other</div>
-        </div>
-        <input id="reliefCustom" type="text" placeholder="Add custom relief (optional)" style="margin-top:8px" />
-      </div>
-
-      <!-- RELIEF USED + OUTCOME -->
-      <div class="row" style="margin-top:10px">
-        <div>
-          <label>Relief Used?</label>
-          <div class="chips" id="reliefUsed" role="radiogroup" aria-label="Relief used">
-            <div class="chip" data-group="reliefused" data-value="Yes">Yes</div>
-            <div class="chip" data-group="reliefused" data-value="No">No</div>
-          </div>
-        </div>
-        <div>
-          <label>Relief Outcome</label>
-          <div class="chips" id="reliefOutcome" role="radiogroup" aria-label="Relief outcome">
-            <div class="chip" data-group="reliefoutcome" data-value="Helped">Helped</div>
-            <div class="chip" data-group="reliefoutcome" data-value="Neutral">Neutral</div>
-            <div class="chip" data-group="reliefoutcome" data-value="Worse">Worse</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DURATION -->
-      <div class="row">
-        <div>
-          <label for="duration">Pain duration after activity</label>
-          <div class="row" style="grid-template-columns:2fr 1fr">
-            <input id="duration" type="number" inputmode="numeric" min="0" placeholder="e.g. 30" />
-            <select id="durationUnit">
-              <option value="min">min</option>
-              <option value="h">hours</option>
-            </select>
-          </div>
-          <div class="hint">Tie this to the event that raised pain.</div>
-        </div>
-        <div>
-          <label for="posture">Posture/Position (optional)</label>
-          <input id="posture" type="text" placeholder="e.g., garden chair, sofa, standing" />
-        </div>
-      </div>
-
-      <!-- NOTES -->
       <div>
-        <label for="notes">Notes</label>
-        <input id="notes" type="text" placeholder="e.g., 2→1 after light activity" />
-      </div>
-
-      <!-- BUTTONS -->
-      <div class="btnbar">
-        <button id="add">Add Entry</button>
-        <button class="ghost" id="save">Save Locally</button>
-        <button class="ghost" id="export">Export CSV</button>
-        <button class="danger" id="clear">Clear All</button>
-      </div>
-      <div class="hint" style="margin-top:6px">
-        Data is stored only on your device (localStorage). Export CSV to share/analyze.
+        <label for="plan">Plan Type</label>
+        <select id="plan">
+          <option value="Day A">Day A – Pelvic/Core</option>
+          <option value="Day B">Day B – Lumbar/Nerve</option>
+          <option value="Day C">Day C – Mixed</option>
+          <option value="Relief">Relief Day</option>
+          <option value="Sport">Sport</option>
+          <option value="Rest">Rest / Other</option>
+        </select>
       </div>
     </div>
-
-    <!-- LIST -->
-    <div class="card">
-      <h2 style="margin:0 0 8px; font-size:18px">Today’s Entries</h2>
-      <div id="list" class="list-empty">No entries yet.</div>
-    </div>
-
-    <div class="footer-space"></div>
   </div>
 
-  <script>
-    // Helpers
-    const $ = (s,root=document)=>root.querySelector(s);
-    const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="step">1) Pain & Change</div>
+    <div class="row">
+      <div>
+        <label>Pain (0–4)</label>
+        <div class="chips" id="painChips" role="radiogroup" aria-label="Pain level">
+          <div class="chip" data-group="pain" data-value="0">0</div>
+          <div class="chip" data-group="pain" data-value="1">1</div>
+          <div class="chip" data-group="pain" data-value="2">2</div>
+          <div class="chip" data-group="pain" data-value="3">3</div>
+          <div class="chip" data-group="pain" data-value="4">4</div>
+          <div class="chip alt" data-group="pain" data-value="1-2">1–2</div>
+          <div class="chip alt" data-group="pain" data-value="3-4">3–4</div>
+        </div>
+      </div>
+      <div>
+        <label>Change</label>
+        <div class="chips" id="changeChips" role="radiogroup" aria-label="Change">
+          <div class="chip" data-group="change" data-value="Increase">Increase</div>
+          <div class="chip" data-group="change" data-value="Decrease">Decrease</div>
+          <div class="chip" data-group="change" data-value="No change">No change</div>
+        </div>
+      </div>
+    </div>
+    <div class="hint">Pick your current pain, then whether it went up, down, or stayed the same.</div>
+  </div>
 
-    // Init datetime to now, rounded to 5 min
-    (function initDT(){
-      const dt = $('#dt');
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - (now.getMinutes() % 5));
-      const tzOffset = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
-      dt.value = tzOffset.toISOString().slice(0,16);
-    })();
+  <!-- STEP 2 -->
+  <div class="card">
+    <div class="step">2) Trigger (what you were doing)</div>
+    <label>Choose any</label>
+    <div class="chips" id="triggers">
+      <div class="chip" data-group="trg" data-value="Getting out of bed">Getting out of bed</div>
+      <div class="chip" data-group="trg" data-value="Sitting desk">Sitting desk</div>
+      <div class="chip" data-group="trg" data-value="After inactivity">After inactivity</div>
+      <div class="chip" data-group="trg" data-value="Walking">Walking</div>
+      <div class="chip" data-group="trg" data-value="Cycling">Cycling</div>
+      <div class="chip" data-group="trg" data-value="Rowing">Rowing</div>
+      <div class="chip" data-group="trg" data-value="Strength core/pelvis">Strength core/pelvis</div>
+      <div class="chip" data-group="trg" data-value="Standing">Standing</div>
+      <div class="chip" data-group="trg" data-value="Stress">Stress</div>
+      <div class="chip" data-group="trg" data-value="Other">Other</div>
+    </div>
+    <input id="triggerCustom" type="text" placeholder="Add custom trigger (optional)" style="margin-top:8px" />
+    <div class="hint">If pain decreased because of an action, log that action here too (e.g., Light walk).</div>
+  </div>
 
-    // Chip toggling
-    function initChipGroup(containerSelector, single=true){
-      const box = $(containerSelector);
-      box.addEventListener('click', (e)=>{
-        const chip = e.target.closest('.chip');
-        if(!chip) return;
-        const group = chip.dataset.group;
-        if(single){
-          $$('.chip[data-group="'+group+'"]', box).forEach(c=>c.dataset.selected="false");
-          chip.dataset.selected = chip.dataset.selected==="true" ? "false" : "true";
-          $$('.chip[data-group="'+group+'"]', box).forEach((c)=>{ if(c!==chip) c.dataset.selected="false"; });
-        }else{
-          chip.dataset.selected = chip.dataset.selected==="true" ? "false" : "true";
-        }
-      });
-      $$('.chip', box).forEach(c=>c.dataset.selected="false");
-    }
+  <!-- STEP 3 -->
+  <div class="card">
+    <div class="step">3) Relief (what you tried & did it work?)</div>
+    <label>Relief Tried (choose any)</label>
+    <div class="chips" id="reliefTried">
+      <div class="chip" data-group="relieftried" data-value="Relief position">Relief position</div>
+      <div class="chip" data-group="relieftried" data-value="Walk">Walk</div>
+      <div class="chip" data-group="relieftried" data-value="Stretch">Stretch</div>
+      <div class="chip" data-group="relieftried" data-value="Change chair/position">Change chair/position</div>
+      <div class="chip" data-group="relieftried" data-value="5 mins active">5 mins active</div>
+      <div class="chip" data-group="relieftried" data-value="Upper body workout">Upper body workout</div>
+      <div class="chip" data-group="relieftried" data-value="Short lie down">Short lie down</div>
+      <div class="chip" data-group="relieftried" data-value="Other">Other</div>
+    </div>
+    <input id="reliefCustom" type="text" placeholder="Add custom relief (optional)" style="margin-top:8px" />
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label>Relief Used?</label>
+        <div class="chips" id="reliefUsed" role="radiogroup" aria-label="Relief used">
+          <div class="chip" data-group="reliefused" data-value="Yes">Yes</div>
+          <div class="chip" data-group="reliefused" data-value="No">No</div>
+        </div>
+      </div>
+      <div>
+        <label>Relief Outcome</label>
+        <div class="chips" id="reliefOutcome" role="radiogroup" aria-label="Relief outcome">
+          <div class="chip" data-group="reliefoutcome" data-value="Helped">Helped</div>
+          <div class="chip" data-group="reliefoutcome" data-value="Neutral">Neutral</div>
+          <div class="chip" data-group="reliefoutcome" data-value="Worse">Worse</div>
+        </div>
+      </div>
+    </div>
+    <div class="hint">Use this when you test a relief after a pain increase.</div>
+  </div>
 
-    initChipGroup('#painChips', true);
-    initChipGroup('#changeChips', true);
-    initChipGroup('#triggers', false);
-    initChipGroup('#reliefTried', false);
-    initChipGroup('#reliefUsed', true);
-    initChipGroup('#reliefOutcome', true);
+  <!-- STEP 4 -->
+  <div class="card">
+    <div class="step">4) Duration & Context</div>
+    <div class="row">
+      <div>
+        <label for="duration">Pain duration after activity</label>
+        <div class="row" style="grid-template-columns:2fr 1fr">
+          <input id="duration" type="number" inputmode="numeric" min="0" placeholder="e.g. 30" />
+          <select id="durationUnit">
+            <option value="min">min</option>
+            <option value="h">hours</option>
+          </select>
+        </div>
+        <div class="hint">Leave blank until the higher pain level settles, then fill it in.</div>
+      </div>
+      <div>
+        <label for="posture">Posture/Position (optional)</label>
+        <input id="posture" type="text" placeholder="e.g., garden chair, sofa, standing" />
+      </div>
+    </div>
+    <label for="notes" style="margin-top:8px">Notes</label>
+    <input id="notes" type="text" placeholder="e.g., 2→1 after light activity" />
+  </div>
 
-    // Storage
-    const KEY = 'painTrackerEntries_v4';
-    const entries = load();
-    function load(){
-      try{ const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; }
-      catch(e){ return []; }
-    }
-    function save(){
-      localStorage.setItem(KEY, JSON.stringify(entries));
-      renderList();
-    }
+  <!-- ACTIONS -->
+  <div class="card">
+    <div class="btnbar">
+      <button id="add">Add Entry</button>
+      <button class="ghost" id="export">Export CSV</button>
+      <button class="ghost" id="save">Save Locally</button>
+      <button class="danger" id="clear">Clear All</button>
+    </div>
+    <div id="msgError" class="error">Please select Pain and at least one Trigger before adding.</div>
+    <div id="msgOk" class="ok">Saved locally ✔</div>
+    <div class="hint">Data is stored only on your device (localStorage). Export CSV to share/analyze.</div>
+  </div>
 
-    function getSelectedValue(group){
-      const sel = document.querySelector(`.chip[data-group="${group}"][data-selected="true"]`);
-      return sel ? sel.dataset.value : '';
-    }
-    function getSelectedMulti(group){
-      return [...document.querySelectorAll(`.chip[data-group="${group}"][data-selected="true"]`)].map(c=>c.dataset.value);
-    }
+  <!-- LIST -->
+  <div class="card">
+    <h2 style="margin:0 0 8px; font-size:18px">Today’s Entries</h2>
+    <div id="list" class="list-empty">No entries yet.</div>
+  </div>
 
-    function clearFormSelection(){
-      ['#painChips','#changeChips','#triggers','#reliefTried','#reliefUsed','#reliefOutcome'].forEach(id=>{
-        $$(id+' .chip').forEach(c=>c.dataset.selected="false");
-      });
-      $('#notes').value = '';
-      $('#posture').value = '';
-      $('#triggerCustom').value = '';
-      $('#reliefCustom').value = '';
-      $('#duration').value = '';
-      $('#durationUnit').value = 'min';
-      $('#load').value = 'Light';
-      $('#plan').value = 'Day A';
+  <div class="footer-space"></div>
+</div>
 
-      const dt = $('#dt');
-      const d = new Date();
-      d.setMinutes(d.getMinutes() - (d.getMinutes()%5));
-      const tz = new Date(d.getTime() - (d.getTimezoneOffset()*60000));
-      dt.value = tz.toISOString().slice(0,16);
-    }
+<script>
+// ---------- Polyfills (safety on older iOS/Chrome) ----------
+if (!('crypto' in window) || !('randomUUID' in crypto)) {
+  window.crypto = window.crypto || {};
+  crypto.randomUUID = () => 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
+}
+if (!window.CSS || !CSS.escape) {
+  window.CSS = window.CSS || {};
+  CSS.escape = s => (s || '').replace(/"/g,'\\"');
+}
 
-    function addEntry(){
-      const pain = getSelectedValue('pain');
-      if(!pain){ alert('Please select a pain level.'); return; }
+// ---------- App ----------
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = (s,root=document)=>root.querySelector(s);
+  const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
 
-      const triggers = [...new Set([
-        ...getSelectedMulti('trg'),
-        ($('#triggerCustom').value||'').trim()
-      ].filter(Boolean))].join(', ');
+  // Init date/time (rounded to 5 min)
+  (function initDT(){
+    const dt = $('#dt');
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - (now.getMinutes()%5));
+    const tz = new Date(now.getTime() - (now.getTimezoneOffset()*60000));
+    dt.value = tz.toISOString().slice(0,16);
+  })();
 
-      const tried = [...new Set([
-        ...getSelectedMulti('relieftried'),
-        ($('#reliefCustom').value||'').trim()
-      ].filter(Boolean))].join(', ');
-
-      const data = {
-        id: crypto.randomUUID(),
-        datetime: $('#dt').value,
-        plan: $('#plan').value,
-        load: $('#load').value,
-        pain: pain,
-        change: getSelectedValue('change'),
-        triggers: triggers,
-        reliefTried: tried,
-        reliefUsed: getSelectedValue('reliefused'),
-        reliefOutcome: getSelectedValue('reliefoutcome'),
-        duration: ($('#duration').value||'') + ($('#duration').value ? ' ' + $('#durationUnit').value : ''),
-        posture: $('#posture').value.trim(),
-        notes: $('#notes').value.trim()
-      };
-      entries.push(data);
-      save();
-      clearFormSelection();
-      $('#list').scrollIntoView({behavior:'smooth', block:'start'});
-    }
-
-    function renderList(){
-      const list = $('#list');
-      if(!entries.length){ list.className='list-empty'; list.textContent='No entries yet.'; return; }
-      list.className='';
-      const todayISO = new Date().toISOString().slice(0,10);
-      const today = entries.filter(e=> (e.datetime||'').slice(0,10)===todayISO);
-      const others = entries.filter(e=> (e.datetime||'').slice(0,10)!==todayISO);
-      const ordered = [...today.sort((a,b)=>a.datetime.localeCompare(b.datetime)), ...others.sort((a,b)=>b.datetime.localeCompare(a.datetime))];
-
-      list.innerHTML = '';
-      ordered.forEach(e=>{
-        const el = document.createElement('div');
-        el.className='entry';
-        const t = new Date(e.datetime);
-        const when = isNaN(t)? e.datetime : t.toLocaleString();
-        el.innerHTML = `
-          <h3>${when} <small>— ${e.plan} • ${e.load}</small></h3>
-          <div class="tags">
-            <span class="tag">Pain: ${e.pain}${e.change ? ' ('+e.change+')':''}</span>
-            ${e.triggers ? `<span class="tag">Trigger: ${e.triggers}</span>`:''}
-            ${e.reliefTried ? `<span class="tag">Relief tried: ${e.reliefTried}</span>`:''}
-            ${e.reliefUsed ? `<span class="tag">Relief used: ${e.reliefUsed}${e.reliefOutcome? ' ('+e.reliefOutcome+')':''}</span>`:''}
-            ${e.duration ? `<span class="tag">Duration: ${e.duration}</span>`:''}
-            ${e.posture ? `<span class="tag">Posture: ${e.posture}</span>`:''}
-          </div>
-          ${e.notes? `<div style="font-size:14px; white-space:pre-wrap">${e.notes.replace(/</g,'&lt;')}</div>`:''}
-          <div class="controls">
-            <button class="ghost" data-act="edit" data-id="${e.id}">Edit</button>
-            <button class="danger" data-act="del" data-id="${e.id}">Delete</button>
-          </div>
-        `;
-        list.appendChild(el);
-      });
-    }
-
-    function toCSV(arr){
-      const header = ["Date & Time","Plan","Activity Load","Pain","Change","Triggers","Relief Tried","Relief Used","Relief Outcome","Pain Duration","Posture","Notes"];
-      const rows = arr.map(e=>[
-        e.datetime, e.plan, e.load, e.pain, e.change||'', e.triggers, e.reliefTried||'', e.reliefUsed, e.reliefOutcome, e.duration, e.posture, (e.notes||'').replace(/\r?\n/g,' ').replace(/"/g,'""')
-      ]);
-      const csv = [header, ...rows].map(r=>r.map(v=>`"${(v??'')}"`).join(',')).join('\n');
-      return csv;
-    }
-
-    // Buttons
-    $('#add').addEventListener('click', addEntry);
-    $('#save').addEventListener('click', ()=>{ save(); alert('Saved locally ✔'); });
-    $('#export').addEventListener('click', ()=>{
-      const csv = toCSV(entries);
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const stamp = new Date().toISOString().slice(0,10);
-      a.download = `pain_entries_${stamp}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-    $('#clear').addEventListener('click', ()=>{
-      if(!confirm('Delete ALL entries from this device?')) return;
-      entries.splice(0, entries.length);
-      save();
-    });
-
-    // Edit/Delete
-    $('#list').addEventListener('click', (e)=>{
-      const b = e.target.closest('button'); if(!b) return;
-      const id = b.dataset.id;
-      const idx = entries.findIndex(x=>x.id===id);
-      if(idx<0) return;
-      if(b.dataset.act==='del'){
-        if(confirm('Delete this entry?')){ entries.splice(idx,1); save(); }
-      }else if(b.dataset.act==='edit'){
-        const item = entries[idx];
-        $('#dt').value = (item.datetime||'').slice(0,16);
-        $('#plan').value = item.plan;
-        $('#load').value = item.load;
-
-        // reset chips
-        ['#painChips','#changeChips','#triggers','#reliefTried','#reliefUsed','#reliefOutcome'].forEach(id=>{
-          $$(id+' .chip').forEach(c=>c.dataset.selected="false");
-        });
-
-        // set pain chip
-        const painChip = document.querySelector(`#painChips .chip[data-value="${CSS.escape(item.pain)}"]`);
-        if(painChip) painChip.dataset.selected="true";
-
-        // set change chip
-        if(item.change){
-          const ch = document.querySelector(`#changeChips .chip[data-value="${CSS.escape(item.change)}"]`);
-          if(ch) ch.dataset.selected="true";
-        }
-
-        // triggers (multi)
-        (item.triggers||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(tv=>{
-          const trg = document.querySelector(`#triggers .chip[data-value="${CSS.escape(tv)}"]`);
-          if(trg){ trg.dataset.selected="true"; } else { $('#triggerCustom').value = tv; }
-        });
-
-        // relief tried (multi)
-        (item.reliefTried||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(rv=>{
-          const rchip = document.querySelector(`#reliefTried .chip[data-value="${CSS.escape(rv)}"]`);
-          if(rchip){ rchip.dataset.selected="true"; } else { $('#reliefCustom').value = rv; }
-        });
-
-        // relief used/outcome
-        if(item.reliefUsed){
-          const ru = document.querySelector(`#reliefUsed .chip[data-value="${CSS.escape(item.reliefUsed)}"]`);
-          if(ru) ru.dataset.selected="true";
-        }
-        if(item.reliefOutcome){
-          const ro = document.querySelector(`#reliefOutcome .chip[data-value="${CSS.escape(item.reliefOutcome)}"]`);
-          if(ro) ro.dataset.selected="true";
-        }
-
-        // duration parse
-        const m = (item.duration||'').match(/^(\d+)\s*(min|h)$/i);
-        $('#duration').value = m? m[1] : '';
-        $('#durationUnit').value = m? m[2].toLowerCase() : 'min';
-        $('#posture').value = item.posture||'';
-        $('#notes').value = item.notes||'';
-
-        // remove so re-adding creates updated one
-        entries.splice(idx,1);
-        save();
-        window.scrollTo({top:0, behavior:'smooth'});
+  // Chip groups
+  function initChipGroup(containerSelector, single=true){
+    const box = $(containerSelector);
+    box.addEventListener('click', (e)=>{
+      const chip = e.target.closest('.chip');
+      if(!chip) return;
+      const group = chip.dataset.group;
+      if(single){
+        $$('.chip[data-group="'+group+'"]', box).forEach(c=>c.dataset.selected="false");
+        chip.dataset.selected = chip.dataset.selected==="true" ? "false" : "true";
+        $$('.chip[data-group="'+group+'"]', box).forEach((c)=>{ if(c!==chip) c.dataset.selected="false"; });
+      }else{
+        chip.dataset.selected = chip.dataset.selected==="true" ? "false" : "true";
       }
     });
+    $$('.chip', box).forEach(c=>c.dataset.selected="false");
+  }
+  initChipGroup('#painChips', true);
+  initChipGroup('#changeChips', true);
+  initChipGroup('#triggers', false);
+  initChipGroup('#reliefTried', false);
+  initChipGroup('#reliefUsed', true);
+  initChipGroup('#reliefOutcome', true);
 
-    // First render
+  // Storage
+  const KEY = 'painTrackerEntries_v5simple';
+  function load(){
+    try{ const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; }
+    catch(e){ console.error(e); return []; }
+  }
+  const entries = load();
+
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(entries));
     renderList();
-  </script>
+  }
+
+  // Helpers
+  function selValue(group){
+    const n = document.querySelector(`.chip[data-group="${group}"][data-selected="true"]`);
+    return n ? n.dataset.value : '';
+  }
+  function selMulti(group){
+    return [...document.querySelectorAll(`.chip[data-group="${group}"][data-selected="true"]`)].map(c=>c.dataset.value);
+  }
+  function val(id){ const el = document.getElementById(id); return el ? (el.value || '') : ''; }
+  function valTrim(id){ return val(id).trim(); }
+  function show(el, yes){ el.style.display = yes ? 'block' : 'none'; }
+
+  function clearForm(){
+    ['#painChips','#changeChips','#triggers','#reliefTried','#reliefUsed','#reliefOutcome'].forEach(id=>{
+      $$(id+' .chip').forEach(c=>c.dataset.selected="false");
+    });
+    ['notes','posture','triggerCustom','reliefCustom','duration'].forEach(id=>{
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    $('#durationUnit').value = 'min';
+    $('#load').value = $('#load')?.value || 'Light'; // load not shown in this simpler version, default ok
+    $('#plan').value = $('#plan')?.value || 'Day A';
+
+    const dt = $('#dt');
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - (d.getMinutes()%5));
+    const tz = new Date(d.getTime() - (d.getTimezoneOffset()*60000));
+    dt.value = tz.toISOString().slice(0,16);
+  }
+
+  function addEntry(){
+    const msgE = $('#msgError'); const msgOk = $('#msgOk');
+    show(msgE,false); show(msgOk,false);
+
+    const painChip = document.querySelector('.chip[data-group="pain"][data-selected="true"]');
+    const hasTrigger = selMulti('trg').length || valTrim('triggerCustom');
+    if(!painChip || !hasTrigger){
+      show(msgE,true); return;
+    }
+
+    const triggers = [...new Set([
+      ...selMulti('trg'),
+      valTrim('triggerCustom')
+    ].filter(Boolean))].join(', ');
+
+    const reliefTried = [...new Set([
+      ...selMulti('relieftried'),
+      valTrim('reliefCustom')
+    ].filter(Boolean))].join(', ');
+
+    const durNum = valTrim('duration');
+    const durUnit = val('durationUnit') || 'min';
+    const duration = durNum ? `${durNum} ${durUnit}` : '';
+
+    const item = {
+      id: crypto.randomUUID(),
+      datetime: valTrim('dt') || new Date().toISOString().slice(0,16),
+      plan: val('plan'),
+      load: '—', // simplified; can add back if needed
+      pain: painChip.dataset.value,
+      change: selValue('change'),
+      triggers,
+      reliefTried,
+      reliefUsed: selValue('reliefused'),
+      reliefOutcome: selValue('reliefoutcome'),
+      duration,
+      posture: valTrim('posture'),
+      notes: valTrim('notes')
+    };
+
+    entries.push(item);
+    save();
+    clearForm();
+    show(msgOk,true);
+    setTimeout(()=>show(msgOk,false), 1200);
+    document.getElementById('list')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function renderList(){
+    const list = $('#list');
+    if(!entries.length){ list.className='list-empty'; list.textContent='No entries yet.'; return; }
+    list.className='';
+    const todayISO = new Date().toISOString().slice(0,10);
+    const today = entries.filter(e=> (e.datetime||'').slice(0,10)===todayISO);
+    const others = entries.filter(e=> (e.datetime||'').slice(0,10)!==todayISO);
+    const ordered = [...today.sort((a,b)=>a.datetime.localeCompare(b.datetime)), ...others.sort((a,b)=>b.datetime.localeCompare(a.datetime))];
+
+    list.innerHTML = '';
+    ordered.forEach(e=>{
+      const el = document.createElement('div');
+      el.className='entry';
+      const t = new Date(e.datetime);
+      const when = isNaN(t)? (e.datetime||'') : t.toLocaleString();
+      el.innerHTML = `
+        <h3>${when} <small>— ${e.plan||''}</small></h3>
+        <div class="tags">
+          <span class="tag">Pain: ${e.pain}${e.change ? ' ('+e.change+')':''}</span>
+          ${e.triggers ? `<span class="tag">Trigger: ${e.triggers}</span>`:''}
+          ${e.reliefTried ? `<span class="tag">Relief tried: ${e.reliefTried}</span>`:''}
+          ${e.reliefUsed ? `<span class="tag">Relief used: ${e.reliefUsed}${e.reliefOutcome? ' ('+e.reliefOutcome+')':''}</span>`:''}
+          ${e.duration ? `<span class="tag">Duration: ${e.duration}</span>`:''}
+          ${e.posture ? `<span class="tag">Posture: ${e.posture}</span>`:''}
+        </div>
+        ${e.notes? `<div style="font-size:14px; white-space:pre-wrap">${(e.notes||'').replace(/</g,'&lt;')}</div>`:''}
+      `;
+      list.appendChild(el);
+    });
+  }
+
+  // Buttons
+  $('#add').addEventListener('click', addEntry);
+  $('#save').addEventListener('click', ()=>{ save(); const m=$('#msgOk'); m.textContent='Saved locally ✔'; m.style.display='block'; setTimeout(()=>m.style.display='none', 1200); });
+  $('#export').addEventListener('click', ()=>{
+    const header = ["Date & Time","Plan","Pain","Change","Triggers","Relief Tried","Relief Used","Relief Outcome","Pain Duration","Posture","Notes"];
+    const rows = entries.map(e=>[
+      e.datetime, e.plan, e.pain, e.change||'', e.triggers||'', e.reliefTried||'', e.reliefUsed||'', e.reliefOutcome||'', e.duration||'', e.posture||'', (e.notes||'').replace(/\r?\n/g,' ').replace(/"/g,'""')
+    ]);
+    const csv = [header, ...rows].map(r=>r.map(v=>`"${(v??'')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = `pain_entries_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+  $('#clear').addEventListener('click', ()=>{
+    if(!confirm('Delete ALL entries from this device?')) return;
+    entries.splice(0, entries.length);
+    save();
+  });
+
+  // First render
+  renderList();
+});
+</script>
 </body>
 </html>
