@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pain Tracker — Pelvic & Lumbar (Presets)</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg:#0b0d10; --fg:#e5e7eb; --muted:#9ca3af; --accent:#60a5fa;
+      --card:#11161c; --chip:#1f2630; --chip-sel:#60a5fa; --chip-sel-fg:#0b0d10;
+      --danger:#ef4444; --radius:14px; --tap:52px; --shadow:none;
+      --border:#25313d; --ok:#34d399;
+      --font:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f8fafc; --fg:#0b1020; --muted:#6b7280; --accent:#2563eb;
+        --card:#ffffff; --chip:#e5e7eb; --chip-sel:#2563eb; --chip-sel-fg:#fff;
+        --shadow:0 4px 12px rgba(0,0,0,.08); --border:#d1d5db; --ok:#10b981;
+      }
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--fg); font-family:var(--font); -webkit-font-smoothing:antialiased;}
+    header{position:sticky; top:0; z-index:5; padding:14px 16px calc(env(safe-area-inset-top) + 6px);
+      background:linear-gradient(180deg, rgba(0,0,0,.08), transparent); backdrop-filter: blur(6px);}
+    h1{margin:0 0 4px; font-size:20px}
+    .sub{color:var(--muted); font-size:13px}
+    .wrap{padding:12px 16px 24px; max-width:840px; margin:0 auto}
+    .card{background:var(--card); padding:14px; border-radius:var(--radius); box-shadow:var(--shadow); margin:12px 0; border:1px solid var(--border)}
+    label{font-size:14px; font-weight:600; display:block; margin:8px 0 6px}
+    input[type="text"],input[type="datetime-local"],textarea{
+      width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:16px; min-height:var(--tap); background:transparent; color:var(--fg);
+    }
+    textarea{min-height:74px}
+    .chips{display:flex; flex-wrap:wrap; gap:8px}
+    .chip{
+      user-select:none; cursor:pointer; padding:10px 14px; border-radius:999px; background:var(--chip);
+      color:var(--fg); font-size:14px; min-height:var(--tap); display:flex; align-items:center; border:1px solid transparent;
+    }
+    .chip[data-selected="true"]{ background:var(--chip-sel); color:var(--chip-sel-fg); }
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media (max-width:520px){ .row{grid-template-columns:1fr} }
+    .btnbar{display:flex; gap:10px; flex-wrap:wrap}
+    button{ appearance:none; border:none; border-radius:12px; padding:12px 16px; font-size:16px; min-height:var(--tap);
+      cursor:pointer; background:var(--accent); color:#fff; box-shadow:var(--shadow); }
+    .ghost{background:transparent; color:var(--accent); border:1px solid var(--accent)}
+    .danger{background:var(--danger)}
+    .entry{border:1px dashed rgba(127,127,127,.25); border-radius:12px; padding:12px; margin:10px 0; background:transparent}
+    .entry h3{margin:0 0 6px; font-size:16px}
+    .entry small{color:var(--muted)}
+    .tags{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0}
+    .tag{background:var(--chip); padding:6px 10px; border-radius:999px; font-size:12px}
+    .hint{font-size:12px; color:var(--muted)}
+    details>summary{cursor:pointer; list-style:none; padding:10px 12px; border-radius:10px; background:var(--chip);
+      font-weight:600; font-size:14px}
+    details[open]>summary{background:var(--chip-sel); color:var(--chip-sel-fg)}
+    .help{padding:10px 8px 2px; font-size:14px; color:var(--fg)}
+    .pill{display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; background:var(--chip); font-size:12px; margin:4px 6px 0 0}
+    .pill button{background:transparent; color:inherit; border:1px solid var(--border); padding:2px 6px; border-radius:8px; font-size:12px}
+    .ok{color:var(--ok); font-size:13px; margin-top:6px; display:none}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pain Tracker</h1>
+    <div class="sub">Pelvic Tilt / Lumbar • Help & Presets • v1.3</div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- HELP -->
+    <div class="card">
+      <details>
+        <summary>Help / Aide — How to log (comment noter)</summary>
+        <div class="help">
+          <p><strong>Main Factor:</strong> Pelvic Tilt/Muscle = posture/adductors/sitting & getting out of bed. Lumbar/Nerve = rowing/cycling/after inactivity/lordosis signs. Unclear = not sure.</p>
+          <p><strong>Change:</strong> Increase = start of flare; Decrease = end; No change = stable.</p>
+          <p><strong>Duration:</strong> fill when pain settles (time between ↑ and ↓).</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- FORM -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="dt">Date & Time</label>
+          <input id="dt" type="datetime-local" />
+        </div>
+        <div>
+          <label>Pain Level (0–4)</label>
+          <div class="chips" id="pain">
+            <div class="chip" data-value="0">0</div><div class="chip" data-value="1">1</div>
+            <div class="chip" data-value="2">2</div><div class="chip" data-value="3">3</div>
+            <div class="chip" data-value="4">4</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Change</label>
+          <div class="chips" id="change">
+            <div class="chip" data-value="Increase">Increase</div>
+            <div class="chip" data-value="Decrease">Decrease</div>
+            <div class="chip" data-value="No change">No change</div>
+          </div>
+        </div>
+        <div>
+          <label>Main Factor</label>
+          <div class="chips" id="factor">
+            <div class="chip" data-value="Pelvic Tilt / Muscle">Pelvic Tilt / Muscle</div>
+            <div class="chip" data-value="Lumbar / Nerve">Lumbar / Nerve</div>
+            <div class="chip" data-value="Unclear">Unclear</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRIGGERS -->
+      <label>Triggers (tap to select — multi)</label>
+      <div class="chips" id="triggers"></div>
+      <input id="triggerCustom" type="text" placeholder="Add custom trigger (optional)" style="margin-top:8px" />
+
+      <!-- RELIEF -->
+      <label style="margin-top:10px">Relief Tried (multi)</label>
+      <div class="chips" id="reliefTried"></div>
+      <input id="reliefCustom" type="text" placeholder="Add custom relief (optional)" style="margin-top:8px" />
+
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Outcome</label>
+          <div class="chips" id="outcome">
+            <div class="chip" data-value="Helped">Helped</div>
+            <div class="chip" data-value="Neutral">Neutral</div>
+            <div class="chip" data-value="Worse">Worse</div>
+          </div>
+        </div>
+        <div>
+          <label>Duration</label>
+          <input id="duration" type="text" placeholder="e.g., 20 min, 2 h" />
+          <div class="hint">Fill when pain settles (time between ↑ and ↓).</div>
+        </div>
+      </div>
+
+      <label for="notes" style="margin-top:6px">Notes</label>
+      <textarea id="notes" placeholder="Optional"></textarea>
+
+      <div class="btnbar" style="margin-top:10px">
+        <button id="addBtn">Add Entry</button>
+        <button class="ghost" id="exportBtn" type="button">Export CSV</button>
+        <button class="danger" id="clearBtn" type="button">Clear All</button>
+      </div>
+      <div id="msg" class="hint" style="margin-top:6px"></div>
+    </div>
+
+    <!-- PRESET BUILDER -->
+    <div class="card">
+      <details>
+        <summary>Customize Presets (Triggers & Relief)</summary>
+        <div class="help">
+          <p>Add your own chips. They appear above immediately and are saved on this device.</p>
+          <div class="row">
+            <div>
+              <label>Add Trigger preset</label>
+              <input id="newTrigger" type="text" placeholder="e.g., Stair climbing" />
+              <button class="ghost" id="addTriggerPreset" type="button" style="margin-top:8px">Add Trigger</button>
+              <div id="triggerPresetList" class="hint" style="margin-top:8px"></div>
+            </div>
+            <div>
+              <label>Add Relief preset</label>
+              <input id="newRelief" type="text" placeholder="e.g., Ice, Heat" />
+              <button class="ghost" id="addReliefPreset" type="button" style="margin-top:8px">Add Relief</button>
+              <div id="reliefPresetList" class="hint" style="margin-top:8px"></div>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:10px">Tip: long-press a chip in the list below to remove it.</div>
+          <div id="presetSaved" class="ok">Presets saved ✔</div>
+        </div>
+      </details>
+    </div>
+
+    <!-- LIST -->
+    <div class="card">
+      <h2 style="margin:0 0 8px; font-size:18px">Today’s Entries</h2>
+      <div id="list" class="list-empty">No entries yet.</div>
+    </div>
+
+  </div>
+
+  <script>
+    // Polyfill
+    if (!('crypto' in window) || !('randomUUID' in crypto)) {
+      window.crypto = window.crypto || {};
+      crypto.randomUUID = () => 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
+    }
+
+    const $ = (s,root=document)=>root.querySelector(s);
+    const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
+
+    // Storage keys
+    const KEY_ENTRIES  = 'painTracker_pelvicLumbar_entries_v13';
+    const KEY_TRIGGERS = 'painTracker_presets_triggers_v13';
+    const KEY_RELIEFS  = 'painTracker_presets_reliefs_v13';
+
+    // Defaults (first run only)
+    const DEFAULT_TRIGGERS = [
+      "Getting out of bed","Sitting desk","After inactivity","Walking","Cycling",
+      "Rowing","Strength core/pelvis","Standing","Stress","Other"
+    ];
+    const DEFAULT_RELIEFS = [
+      "Relief position","Walk","Stretch","Change chair/position","5 mins active",
+      "Upper body workout","Short lie down","Other"
+    ];
+
+    // Load / init presets
+    const entries = JSON.parse(localStorage.getItem(KEY_ENTRIES)||'[]');
+    let triggerPresets = JSON.parse(localStorage.getItem(KEY_TRIGGERS)||'null') || DEFAULT_TRIGGERS.slice();
+    let reliefPresets  = JSON.parse(localStorage.getItem(KEY_RELIEFS)||'null')  || DEFAULT_RELIEFS.slice();
+
+    function persistPresets(){
+      localStorage.setItem(KEY_TRIGGERS, JSON.stringify(triggerPresets));
+      localStorage.setItem(KEY_RELIEFS, JSON.stringify(reliefPresets));
+      const ok = $('#presetSaved'); ok.style.display='block'; setTimeout(()=>ok.style.display='none', 1200);
+    }
+    function persistEntries(){ localStorage.setItem(KEY_ENTRIES, JSON.stringify(entries)); }
+
+    // Init datetime (rounded to 5 min)
+    (function initDT(){
+      const dt = $('#dt');
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - (now.getMinutes()%5));
+      const tz = new Date(now.getTime() - (now.getTimezoneOffset()*60000));
+      dt.value = tz.toISOString().slice(0,16);
+    })();
+
+    // Single-select groups
+    function initSingle(id){
+      const box = $(id);
+      box.addEventListener('click', e=>{
+        const chip = e.target.closest('.chip'); if(!chip) return;
+        $$('.chip', box).forEach(c=>c.dataset.selected="false");
+        chip.dataset.selected = "true";
+      });
+    }
+    ['#pain','#change','#factor','#outcome'].forEach(initSingle);
+
+    // Multi-select groups (event delegation)
+    function initMulti(containerSelector, groupName){
+      const box = $(containerSelector);
+      box.addEventListener('click', e=>{
+        const chip = e.target.closest('.chip'); if(!chip) return;
+        if(chip.dataset.group !== groupName) return;
+        chip.dataset.selected = chip.dataset.selected==="true" ? "false" : "true";
+      });
+    }
+    initMulti('#triggers','trg');
+    initMulti('#reliefTried','relieftried');
+
+    // Render preset chips into the chip rows
+    function renderPresetChips(){
+      const trgBox = $('#triggers');
+      const rlfBox = $('#reliefTried');
+      trgBox.innerHTML = '';
+      rlfBox.innerHTML = '';
+
+      triggerPresets.forEach(v=>{
+        const d = document.createElement('div');
+        d.className='chip'; d.dataset.group='trg'; d.dataset.value=v; d.textContent=v;
+        trgBox.appendChild(d);
+      });
+      reliefPresets.forEach(v=>{
+        const d = document.createElement('div');
+        d.className='chip'; d.dataset.group='relieftried'; d.dataset.value=v; d.textContent=v;
+        rlfBox.appendChild(d);
+      });
+    }
+
+    // Render preset lists with remove buttons
+    function renderPresetLists(){
+      const tp = $('#triggerPresetList'); const rp = $('#reliefPresetList');
+      tp.innerHTML = ''; rp.innerHTML = '';
+
+      triggerPresets.forEach((v,i)=>{
+        const el = document.createElement('span');
+        el.className='pill'; el.innerHTML = `${v} <button data-type="trg" data-idx="${i}">remove</button>`;
+        tp.appendChild(el);
+      });
+      reliefPresets.forEach((v,i)=>{
+        const el = document.createElement('span');
+        el.className='pill'; el.innerHTML = `${v} <button data-type="rlf" data-idx="${i}">remove</button>`;
+        rp.appendChild(el);
+      });
+    }
+
+    // Add preset handlers
+    $('#addTriggerPreset').addEventListener('click', ()=>{
+      const val = ($('#newTrigger').value||'').trim();
+      if(!val) return;
+      if(!triggerPresets.includes(val)){
+        triggerPresets.push(val);
+        persistPresets(); renderPresetChips(); renderPresetLists();
+      }
+      $('#newTrigger').value = '';
+    });
+    $('#addReliefPreset').addEventListener('click', ()=>{
+      const val = ($('#newRelief').value||'').trim();
+      if(!val) return;
+      if(!reliefPresets.includes(val)){
+        reliefPresets.push(val);
+        persistPresets(); renderPresetChips(); renderPresetLists();
+      }
+      $('#newRelief').value = '';
+    });
+
+    // Remove preset (via buttons next to each pill)
+    document.addEventListener('click', (e)=>{
+      const b = e.target.closest('button'); if(!b) return;
+      if(b.dataset.type==='trg'){
+        const i = +b.dataset.idx; if(i>=0){ triggerPresets.splice(i,1); persistPresets(); renderPresetChips(); renderPresetLists(); }
+      }else if(b.dataset.type==='rlf'){
+        const i = +b.dataset.idx; if(i>=0){ reliefPresets.splice(i,1); persistPresets(); renderPresetChips(); renderPresetLists(); }
+      }
+    });
+
+    // Utilities to gather values
+    function chipVal(id){ const sel = document.querySelector(`${id} .chip[data-selected="true"]`); return sel? sel.dataset.value : ''; }
+    function chipMultiVals(group){ return [...document.querySelectorAll(`.chip[data-group="${group}"][data-selected="true"]`)].map(c=>c.dataset.value); }
+
+    // Add entry
+    function addEntry(){
+      const msg = $('#msg'); msg.textContent='';
+      const pain = chipVal('#pain'); if(!pain){ msg.textContent='Pick a pain level (0–4).'; return; }
+      const triggers = [...new Set([...chipMultiVals('trg'), ($('#triggerCustom').value||'').trim()].filter(Boolean))].join(', ');
+      if(!triggers){ msg.textContent='Add at least one trigger (preset or custom).'; return; }
+      const relief = [...new Set([...chipMultiVals('relieftried'), ($('#reliefCustom').value||'').trim()].filter(Boolean))].join(', ');
+
+      const item = {
+        id: crypto.randomUUID(),
+        dt: $('#dt').value,
+        pain,
+        change: chipVal('#change'),
+        factor: chipVal('#factor'),
+        trigger: triggers,
+        relief: relief,
+        outcome: chipVal('#outcome'),
+        duration: ($('#duration').value||'').trim(),
+        notes: ($('#notes').value||'').trim()
+      };
+      entries.push(item);
+      persistEntries();
+      renderEntries();
+
+      // reset quick fields (keep dt)
+      ['#pain','#change','#factor','#outcome','#triggers','#reliefTried'].forEach(id=>{
+        $$(id+' .chip').forEach(c=>c.dataset.selected="false");
+      });
+      ['triggerCustom','reliefCustom','duration','notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+      msg.textContent='Saved locally ✔';
+      setTimeout(()=>{ msg.textContent=''; }, 1200);
+    }
+
+    // Export CSV
+    function exportCSV(){
+      const header = ["Date & Time","Pain","Change","Main Factor","Triggers","Relief Tried","Outcome","Duration","Notes","ID"];
+      const rows = entries.map(e=>[
+        e.dt, e.pain, e.change||'', e.factor||'', e.trigger||'', e.relief||'', e.outcome||'', e.duration||'', (e.notes||'').replace(/\r?\n/g,' '), e.id
+      ]);
+      const csv = [header, ...rows].map(r=>r.map(v=>`"${(v??'')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = `pain_entries_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Clear all entries
+    function clearAll(){
+      if(!confirm('Delete ALL entries on this device?')) return;
+      entries.splice(0, entries.length);
+      persistEntries();
+      renderEntries();
+    }
+
+    // Render entries
+    function renderEntries(){
+      const list = $('#list');
+      if(!entries.length){ list.className='list-empty'; list.textContent='No entries yet.'; return; }
+      list.className='';
+      list.innerHTML = '';
+      const today = new Date().toISOString().slice(0,10);
+      const todayEntries = entries.filter(e=> (e.dt||'').slice(0,10)===today);
+      const others = entries.filter(e=> (e.dt||'').slice(0,10)!==today);
+      const ordered = [
+        ...todayEntries.sort((a,b)=>a.dt.localeCompare(b.dt)),
+        ...others.sort((a,b)=>b.dt.localeCompare(a.dt))
+      ];
+      ordered.forEach(e=>{
+        const div = document.createElement('div');
+        div.className='entry';
+        div.innerHTML = `
+          <h3>${e.dt||''} <small>${e.factor? '• '+e.factor : ''}</small></h3>
+          <div class="tags">
+            <span class="tag">Pain: ${e.pain}${e.change? ' ('+e.change+')':''}</span>
+            ${e.trigger? `<span class="tag">Triggers: ${e.trigger}</span>`:''}
+            ${e.relief? `<span class="tag">Relief: ${e.relief}${e.outcome? ' ('+e.outcome+')':''}</span>`:''}
+            ${e.duration? `<span class="tag">Duration: ${e.duration}</span>`:''}
+          </div>
+          ${e.notes? `<div style="font-size:14px; white-space:pre-wrap">${e.notes.replace(/</g,'&lt;')}</div>`:''}
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // Wire buttons
+    $('#addBtn').addEventListener('click', addEntry);
+    $('#exportBtn').addEventListener('click', exportCSV);
+    $('#clearBtn').addEventListener('click', clearAll);
+
+    // First render
+    renderPresetChips();
+    renderPresetLists();
+    renderEntries();
+  </script>
+</body>
+</html>
