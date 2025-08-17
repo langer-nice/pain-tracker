@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pain Tracker — Redesigned</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#0a0a0a; --muted:#6b7280; --accent:#2563eb; --ok:#16a34a; --warn:#b45309; --bad:#dc2626; --surface:#f8fafc;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b0f15; --fg:#e5e7eb; --muted:#9ca3af; --accent:#60a5fa; --ok:#34d399; --warn:#f59e0b; --bad:#f87171; --surface:#0f172a; }
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--fg); }
+    header{ position:sticky; top:0; z-index:10; backdrop-filter:saturate(180%) blur(8px); background:color-mix(in hsl, var(--bg) 85%, transparent); border-bottom:1px solid color-mix(in hsl, var(--muted) 20%, transparent); }
+    .container{ max-width:1100px; margin:0 auto; padding:16px; }
+    h1{ font-size:clamp(1.4rem, 1rem + 2vw, 2rem); margin:0.2rem 0; }
+
+    /* layout */
+    .grid{ display:grid; gap:12px; grid-template-columns: repeat(12, 1fr); }
+    .card{ background:var(--surface); border:1px solid color-mix(in hsl, var(--muted) 20%, transparent); border-radius:14px; padding:14px; }
+
+    /* form */
+    label{ font-weight:600; font-size:0.95rem; display:block; margin-top:8px; }
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid color-mix(in hsl, var(--muted) 25%, transparent); background:var(--bg); color:var(--fg);
+    }
+    textarea{ min-height:80px; resize:vertical; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .row > div{ flex:1 1 180px; }
+    .muted{ color:var(--muted); font-size:0.9rem; }
+
+    /* buttons */
+    .btn{ appearance:none; border:none; border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer; background:var(--accent); color:white; }
+    .btn.secondary{ background:transparent; color:var(--accent); border:1px solid var(--accent); }
+    .btn.warn{ background:transparent; color:var(--bad); border:1px solid var(--bad); }
+    .btn-group{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* table */
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ text-align:left; padding:10px; border-bottom:1px solid color-mix(in hsl, var(--muted) 20%, transparent); vertical-align:top; }
+    th{ font-size:0.9rem; color:var(--muted); position:sticky; top:56px; background:var(--surface); }
+    tr:hover{ background:color-mix(in hsl, var(--surface) 80%, var(--bg)); }
+    .chip{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:0.75rem; border:1px solid color-mix(in hsl, var(--muted) 30%, transparent); margin-right:6px; }
+    .chip.ok{ border-color:var(--ok); color:var(--ok); }
+    .chip.bad{ border-color:var(--bad); color:var(--bad); }
+
+    /* responsive */
+    @media (max-width: 720px){ th:nth-child(6), td:nth-child(6), th:nth-child(7), td:nth-child(7){ display:none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Pain Tracker — Redesigned</h1>
+      <div class="muted">Log with <strong>Main Factor</strong>, optional <strong>Secondary Factor</strong>, and <strong>Confidence</strong>. Edit any entry. Export to CSV.</div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top:12px">
+    <div class="grid">
+      <section class="card" style="grid-column: 1 / -1">
+        <div class="btn-group" role="group" aria-label="Primary actions">
+          <button class="btn" id="newEntryBtn">+ New entry</button>
+          <button class="btn secondary" id="exportBtn" title="Download CSV of all entries">Export CSV</button>
+          <button class="btn secondary" id="clearFiltersBtn">Clear filters</button>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="filterDate">Filter date</label>
+            <input type="text" id="filterDate" placeholder="YYYY-MM-DD">
+          </div>
+          <div>
+            <label for="filterFactor">Filter by factor</label>
+            <select id="filterFactor">
+              <option value="">All</option>
+              <option>Pelvic Tilt / Muscle</option>
+              <option>Lumbar / Nerve</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section id="formCard" class="card" style="grid-column: 1 / -1; display:none">
+        <h2 style="margin:6px 0 10px">Entry</h2>
+        <form id="entryForm" autocomplete="off">
+          <input type="hidden" id="entryId">
+          <div class="row">
+            <div>
+              <label for="datetime">Date & Time</label>
+              <input type="text" id="datetime" required>
+              <div class="muted">Auto-filled. You can adjust.</div>
+            </div>
+            <div>
+              <label for="pain">Pain (0–10)</label>
+              <input type="number" id="pain" min="0" max="10" step="1" required>
+            </div>
+            <div>
+              <label for="change">Change</label>
+              <select id="change" required>
+                <option value="">— Select —</option>
+                <option>Increase</option>
+                <option>Decrease</option>
+                <option>No Change</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="mainFactor">Main Factor</label>
+              <select id="mainFactor" required>
+                <option value="">— Select —</option>
+                <option>Pelvic Tilt / Muscle</option>
+                <option>Lumbar / Nerve</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="secondaryFactor">Secondary Factor (optional)</label>
+              <select id="secondaryFactor">
+                <option>None</option>
+                <option>Pelvic Tilt / Muscle</option>
+                <option>Lumbar / Nerve</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Confidence</label>
+              <div class="row" role="radiogroup" aria-label="Confidence">
+                <label><input type="radio" name="confidence" value="Sure" checked> ✅ Sure</label>
+                <label><input type="radio" name="confidence" value="Unsure"> ❓ Unsure</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="triggers">Triggers</label>
+              <input type="text" id="triggers" placeholder="e.g. Sitting on scooter; Knees to chest; After inactivity">
+            </div>
+            <div>
+              <label for="relief">Relief Tried</label>
+              <input type="text" id="relief" placeholder="e.g. Walk; Change position; Stretch">
+            </div>
+            <div>
+              <label for="outcome">Outcome</label>
+              <select id="outcome">
+                <option value="">— Select —</option>
+                <option>Helped</option>
+                <option>Worse</option>
+                <option>No Change</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="duration">Duration</label>
+              <input type="text" id="duration" placeholder="e.g. 10 mins, 1 h, 90 min">
+            </div>
+            <div style="flex:2 1 260px">
+              <label for="notes">Notes</label>
+              <textarea id="notes" placeholder="Details, posture, sensations, anything notable..."></textarea>
+            </div>
+          </div>
+
+          <div class="btn-group" style="margin-top:10px">
+            <button type="submit" class="btn" id="saveBtn">Save</button>
+            <button type="button" class="btn secondary" id="cancelBtn">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" style="grid-column: 1 / -1">
+        <h2 style="margin:6px 0 10px">Entries</h2>
+        <div class="muted" style="margin-bottom:6px">Click an entry to edit it.</div>
+        <div style="overflow:auto; max-height:60vh; border:1px solid color-mix(in hsl, var(--muted) 20%, transparent); border-radius:10px">
+          <table id="entriesTable" aria-label="Pain entries">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Pain</th>
+                <th>Change</th>
+                <th>Main</th>
+                <th>Secondary</th>
+                <th>Confidence</th>
+                <th>Triggers</th>
+                <th>Relief</th>
+                <th>Outcome</th>
+                <th>Duration</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+(function(){
+  const $ = (sel) => document.querySelector(sel);
+  const nowIsoLocal = () => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const iso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return iso; // minutes precision is plenty for logging
+  };
+
+  const STORAGE_KEY = 'painEntriesV2';
+
+  const state = {
+    entries: [],
+    editingId: null,
+    filters: { date:'', factor:'' }
+  };
+
+  // Safe load/save
+  const load = () => {
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      state.entries = raw ? JSON.parse(raw) : [];
+    } catch(e){
+      console.error('Failed to load entries', e);
+      state.entries = [];
+    }
+  };
+  const save = () => {
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries)); }
+    catch(e){ console.error('Failed to save entries', e); }
+  };
+
+  const uuid = () => (crypto?.randomUUID ? crypto.randomUUID() : 'id-' + Math.random().toString(36).slice(2));
+
+  const openForm = (prefill={}) => {
+    $('#formCard').style.display = 'block';
+    $('#entryId').value = prefill.id || '';
+    $('#datetime').value = prefill.datetime || nowIsoLocal();
+    $('#pain').value = prefill.pain ?? '';
+    $('#change').value = prefill.change || '';
+    $('#mainFactor').value = prefill.mainFactor || '';
+    $('#secondaryFactor').value = prefill.secondaryFactor || 'None';
+    const conf = prefill.confidence || 'Sure';
+    document.querySelectorAll('input[name="confidence"]').forEach(r => r.checked = (r.value === conf));
+    $('#triggers').value = prefill.triggers || '';
+    $('#relief').value = prefill.relief || '';
+    $('#outcome').value = prefill.outcome || '';
+    $('#duration').value = prefill.duration || '';
+    $('#notes').value = prefill.notes || '';
+  };
+  const closeForm = () => {
+    $('#formCard').style.display = 'none';
+    $('#entryForm').reset();
+  };
+
+  const entryFromForm = () => {
+    const confidence = document.querySelector('input[name="confidence"]:checked')?.value || 'Sure';
+    return {
+      id: $('#entryId').value || uuid(),
+      datetime: $('#datetime').value.trim(),
+      pain: Number($('#pain').value),
+      change: $('#change').value,
+      mainFactor: $('#mainFactor').value,
+      secondaryFactor: $('#secondaryFactor').value || 'None',
+      confidence,
+      triggers: $('#triggers').value.trim(),
+      relief: $('#relief').value.trim(),
+      outcome: $('#outcome').value,
+      duration: $('#duration').value.trim(),
+      notes: $('#notes').value.trim()
+    };
+  };
+
+  const validate = (e) => {
+    const err = [];
+    if(!$('#datetime').value) err.push('Date & Time');
+    if($('#pain').value === '') err.push('Pain');
+    if(!$('#change').value) err.push('Change');
+    if(!$('#mainFactor').value) err.push('Main Factor');
+    if(err.length){ alert('Please fill: ' + err.join(', ')); return false; }
+    return true;
+  };
+
+  const render = () => {
+    const tbody = $('#entriesBody');
+    tbody.innerHTML = '';
+
+    // Sort desc by datetime
+    const items = [...state.entries]
+      .filter(it => !state.filters.date || (it.datetime?.startsWith(state.filters.date)))
+      .filter(it => !state.filters.factor || it.mainFactor === state.filters.factor)
+      .sort((a,b) => (a.datetime < b.datetime ? 1 : -1));
+
+    for(const it of items){
+      const tr = document.createElement('tr');
+      const confChip = `<span class="chip ${it.confidence==='Sure'?'ok':'bad'}">${it.confidence}</span>`;
+      tr.innerHTML = `
+        <td><div style="min-width:150px">${it.datetime || ''}</div></td>
+        <td>${Number.isFinite(it.pain)? it.pain : ''}</td>
+        <td>${it.change || ''}</td>
+        <td>${it.mainFactor || ''}</td>
+        <td>${it.secondaryFactor || 'None'}</td>
+        <td>${confChip}</td>
+        <td>${it.triggers || ''}</td>
+        <td>${it.relief || ''}</td>
+        <td>${it.outcome || ''}</td>
+        <td>${it.duration || ''}</td>
+        <td>${it.notes || ''}</td>
+        <td>
+          <button class="btn secondary" data-action="edit" data-id="${it.id}">Edit</button>
+          <button class="btn warn" data-action="del" data-id="${it.id}">Delete</button>
+        </td>`;
+      tr.addEventListener('click', (ev)=>{
+        // avoid double-opening when clicking buttons
+        if(ev.target.closest('button')) return;
+        openForm(it);
+      });
+      tbody.appendChild(tr);
+    }
+  };
+
+  const exportCSV = () => {
+    const header = [
+      'ID','Date & Time','Pain','Change','Main Factor','Secondary Factor','Confidence','Triggers','Relief Tried','Outcome','Duration','Notes'
+    ];
+    const esc = (v) => {
+      if(v === null || v === undefined) return '';
+      const s = String(v);
+      if(/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+    const lines = [header.join(',')];
+    for(const it of state.entries){
+      lines.push([
+        it.id, it.datetime, it.pain, it.change, it.mainFactor, it.secondaryFactor, it.confidence,
+        it.triggers, it.relief, it.outcome, it.duration, it.notes
+      ].map(esc).join(','));
+    }
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'pain_entries.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Event wiring
+  $('#newEntryBtn').addEventListener('click', ()=> openForm({}));
+  $('#cancelBtn').addEventListener('click', ()=> closeForm());
+  $('#exportBtn').addEventListener('click', exportCSV);
+  $('#clearFiltersBtn').addEventListener('click', ()=>{ state.filters={date:'',factor:''}; $('#filterDate').value=''; $('#filterFactor').value=''; render(); });
+  $('#filterDate').addEventListener('input', (e)=>{ state.filters.date = e.target.value.trim(); render(); });
+  $('#filterFactor').addEventListener('change', (e)=>{ state.filters.factor = e.target.value; render(); });
+
+  $('#entryForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    if(!validate()) return;
+    const it = entryFromForm();
+    const idx = state.entries.findIndex(x => x.id === it.id);
+    if(idx >= 0) state.entries[idx] = it; else state.entries.push(it);
+    save();
+    closeForm();
+    render();
+  });
+
+  // Row action buttons (edit/delete)
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const id = btn.getAttribute('data-id');
+    if(btn.dataset.action === 'edit'){
+      const it = state.entries.find(x=>x.id===id);
+      if(it) openForm(it);
+    } else if(btn.dataset.action === 'del'){
+      if(confirm('Delete this entry?')){
+        state.entries = state.entries.filter(x=>x.id!==id);
+        save(); render();
+      }
+    }
+  });
+
+  // Init
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
